@@ -1,6 +1,6 @@
-unit ReSIDThread;
+unit XSIDThread;
 
-{$INCLUDE ReSID.inc}
+{$INCLUDE XSID.inc}
 
 interface
 
@@ -8,31 +8,31 @@ uses
 {$IFDEF DCC}
 	Windows,
 {$ENDIF}
-	Classes, SyncObjs, C64Types, ReSIDTypes, C64Thread, LibReSIDFP;
+	Classes, SyncObjs, C64Types, XSIDTypes, C64Thread, LibReSIDFP;
 
 type
-//	TReSIDEventQueue = (reqPattern, reqLFO1, reqLFO2, reqLFO3, reqRealtime);
+//	TXSIDEventQueue = (reqPattern, reqLFO1, reqLFO2, reqLFO3, reqRealtime);
 
-	TReSIDEventQueueData = record
+	TXSIDEventQueueData = record
 		Head,
-		Tail: PReSIDEvent;
+		Tail: PXSIDEvent;
 		Count: Integer;
-		Next: PReSIDEvent;
+		Next: PXSIDEvent;
 		Index: Integer;
 		TTL: cycle_count;
 	end;
 
-{ TReSIDEventManager }
+{ TXSIDEventManager }
 
-	TReSIDEventManager = class(TObject)
+	TXSIDEventManager = class(TObject)
 	protected
 //		FLock: TCriticalSection;
-//		FQueues: array[TReSIDEventQueue] of TReSIDEventQueueData;
-		FQueue: TReSIDEventQueueData;
+//		FQueues: array[TXSIDEventQueue] of TXSIDEventQueueData;
+		FQueue: TXSIDEventQueueData;
 
-		procedure DoAddEvent({const AQueue: TReSIDEventQueue;}
-				AEvent: PReSIDEvent); {$IFDEF DEF_FNC_RESIDINLNE}inline;{$ENDIF}
-		procedure DoClearQueueData{(const AQueue: TReSIDEventQueue)}; {$IFDEF DEF_FNC_RESIDINLNE}inline;{$ENDIF}
+		procedure DoAddEvent({const AQueue: TXSIDEventQueue;}
+				AEvent: PXSIDEvent); {$IFDEF DEF_FNC_XSIDINLNE}inline;{$ENDIF}
+		procedure DoClearQueueData{(const AQueue: TXSIDEventQueue)}; {$IFDEF DEF_FNC_XSIDINLNE}inline;{$ENDIF}
 
 	public
 		constructor Create;
@@ -41,45 +41,47 @@ type
 //		procedure Lock;
 //		procedure Unlock;
 
-		procedure AddEvent({const AQueue: TReSIDEventQueue;}
+		procedure AddEvent({const AQueue: TXSIDEventQueue;}
 				const AOffset: cycle_count; const AReg, AValue: reg8);
-		procedure InsertEvent({const AQueue: TReSIDEventQueue;}
+		procedure InsertEvent({const AQueue: TXSIDEventQueue;}
 				const AOffset: cycle_count; const AReg, AValue: reg8);
-		procedure CopyEvents({const AQueue: TReSIDEventQueue;}
+		procedure CopyEvents({const AQueue: TXSIDEventQueue;}
 				const AList: TList);
-		procedure ClearEvents{(const AQueue: TReSIDEventQueue)};
+		procedure ClearEvents(const ARelease: Boolean = True){(const AQueue: TXSIDEventQueue)};
 //		procedure ClearAllEvents;
-		function  Seek({const AQueue: TReSIDEventQueue; }const AOffset: Integer;
-				var AContext: TReSIDContext): Integer;
+		function  Seek({const AQueue: TXSIDEventQueue; }const AOffset: Integer;
+				var AContext: TXSIDContext): Integer;
 
 		procedure Clock(const ATicks: cycle_count; var ADeltaT: cycle_count;
-				var AEvents: TReSIDEventArr);
+				var AEvents: TXSIDEventArr);
 	end;
 
 
-{ TReSIDStatsThread }
-	TReSIDStats = record
+{ TXSIDStatsThread }
+	TXSIDStats = record
 		ThsTick,
 		DeltaT: cycle_count;
-		Perf: TReSIDFloat;
+		Perf: TXSIDFloat;
 		CmpOffs,
 		BufSiz: Integer;
 		EvtCnt,
 		EvtIdx: Integer;
-		Peak: TReSIDFloat;
+		Peak: TXSIDFloat;
 		Clipped: Boolean;
 		fps: Single;
 	end;
 
 //	dengland Need an id, as well?
-	TReSIDStatsCallback = procedure(const AStats: TReSIDStats) of object;
+	TXSIDStatsCallback = procedure(const AID: Integer;
+			const AStats: TXSIDStats) of object;
 
-	TReSIDStatsThread = class(TThread)
+	TXSIDStatsThread = class(TThread)
 	private
 		FLock: TCriticalSection;
-		FCallback: TReSIDStatsCallback;
-		FStats: TReSIDStats;
-		FSleepTime: TReSIDFloat;
+		FCallback: TXSIDStatsCallback;
+		FID: Integer;
+		FStats: TXSIDStats;
+		FSleepTime: TXSIDFloat;
 
 		FThen: TDateTime;
 		FUpdates: Integer;
@@ -89,21 +91,21 @@ type
 
 		procedure Execute; override;
 
-		procedure UpdateFrontEnd(DeltaT, Ticks: cycle_count; Perf: TReSIDFloat;
+		procedure UpdateFrontEnd(DeltaT, Ticks: cycle_count; Perf: TXSIDFloat;
 				CmpOffs, BufSize, EventCount, EventIdx: Integer;
-				peak: TReSIDFloat; clipped: Boolean);
+				peak: TXSIDFloat; clipped: Boolean);
 
 	public
-		constructor Create(const AConfig: TReSIDConfig;
-				const ACallback: TReSIDStatsCallback);
+		constructor Create(const AConfig: TXSIDConfig;
+				const ACallback: TXSIDStatsCallback; const AID: Integer);
 		destructor  Destroy; override;
 	end;
 
-{ TReSIDThread }
+{ TXSIDThread }
 
-	TReSIDThread = class(TC64SystemThread)
+	TXSIDThread = class(TC64SystemThread)
 	private
-		FStatsThrd: TReSIDStatsThread;
+		FStatsThrd: TXSIDStatsThread;
 
 		FBuf: array[0..15] of SmallInt;
 		FBuffer: PArrSmallInt;
@@ -114,12 +116,13 @@ type
 		FBuffSzDiv2: Cardinal;
 
 	protected
-		FAudio: TReSIDAudioRenderer;
+		FAudio: TXSIDAudioRenderer;
 		FReSID: Pointer;
-		FConfig: TReSIDConfig;
-		FCallback: TReSIDStatsCallback;
-		FEventData: TReSIDEventArr;
-		FZoomCycles: Cardinal;
+		FConfig: TXSIDConfig;
+		FEvents: TXSIDEventManager;
+		FCallback: TXSIDStatsCallback;
+		FID: Integer;
+		FEventData: TXSIDEventArr;
 
 		procedure DoConstruction; override;
 		procedure DoDestruction; override;
@@ -129,23 +132,23 @@ type
 		procedure UpdateFrontEnd(const ATicks: Cardinal); override;
 
 	public
-		constructor Create(const AConfig: TReSIDConfig;
-				const ACallback: TReSIDStatsCallback);
+		constructor Create(const AConfig: TXSIDConfig;
+				const ACallback: TXSIDStatsCallback; const AID: Integer = -1;
+				const AEvents: TXSIDEventManager = nil);
 
 		procedure SetEnabled(const AVoice: reg8; const AEnable: Boolean);
 		procedure SetGain(AValue: reg8);
-        procedure RestoreContext(AContext: TReSIDContext);
-		procedure Zoom(const ACycles: Cardinal);
+		procedure RestoreContext(AContext: TXSIDContext);
 	end;
 
 
 var
-	GlobalEvents: TReSIDEventManager;
-	GlobalReSID: TReSIDThread;
+	GlobalEvents: TXSIDEventManager;
+	GlobalXSID: TXSIDThread;
 
-procedure GlobalReSIDStart(const AConfig: TReSIDConfig;
-		const ACallback: TReSIDStatsCallback);
-procedure GlobalReSIDStop;
+procedure GlobalXSIDStart(const AConfig: TXSIDConfig;
+		const ACallback: TXSIDStatsCallback);
+procedure GlobalXSIDStop;
 
 
 
@@ -155,7 +158,7 @@ uses
 	Math, SysUtils, Forms;
 
 
-procedure GlobalReSIDStop;
+procedure GlobalXSIDStop;
 	begin
 //	if  Assigned(GlobalController) then
 //		begin
@@ -165,12 +168,12 @@ procedure GlobalReSIDStop;
 //		GlobalController:= nil;
 //		end;
 
-	if  Assigned(GlobalReSID) then
+	if  Assigned(GlobalXSID) then
 		begin
-		GlobalReSID.Terminate;
-		GlobalReSID.WaitFor;
-		GlobalReSID.Free;
-		GlobalReSID:= nil;
+		GlobalXSID.Terminate;
+		GlobalXSID.WaitFor;
+		GlobalXSID.Free;
+		GlobalXSID:= nil;
 		end;
 
 	if Assigned(GlobalEvents) then
@@ -180,22 +183,22 @@ procedure GlobalReSIDStop;
 		end;
 	end;
 
-procedure GlobalReSIDStart(const AConfig: TReSIDConfig;
-		const ACallback: TReSIDStatsCallback);
+procedure GlobalXSIDStart(const AConfig: TXSIDConfig;
+		const ACallback: TXSIDStatsCallback);
 	begin
-//	GlobalReSIDStop;
+//	GlobalXSIDStop;
 
 	AConfig.Started:= False;
 	AConfig.Changed:= False;
 
 	if not Assigned(GlobalEvents) then
-		GlobalEvents:= TReSIDEventManager.Create;
+		GlobalEvents:= TXSIDEventManager.Create;
 //	else
 //		GlobalEvents.ClearAllEvents;
 //		GlobalEvents.ClearEvents;
 
-	GlobalReSID:= TReSIDThread.Create(AConfig, ACallback);
-	GlobalReSID.Priority:= tpTimeCritical;
+	GlobalXSID:= TXSIDThread.Create(AConfig, ACallback, -1);
+	GlobalXSID.Priority:= tpTimeCritical;
 
 	while not AConfig.Started do
 		begin
@@ -209,17 +212,17 @@ procedure GlobalReSIDStart(const AConfig: TReSIDConfig;
 			Application.ProcessMessages;
 		end;
 
-//	GlobalController:= TReSIDControllerThread.Create(AConfig);
-	GlobalReSID.Priority:= tpHigher;
+//	GlobalController:= TXSIDControllerThread.Create(AConfig);
+	GlobalXSID.Priority:= tpHigher;
 
 //fixme There needs to be some checking for the startup of the controller
 //	Sleep(500);
 	end;
 
-{ TReSIDEventManager }
+{ TXSIDEventManager }
 
-procedure TReSIDEventManager.DoAddEvent({const AQueue: TReSIDEventQueue;}
-		AEvent: PReSIDEvent);
+procedure TXSIDEventManager.DoAddEvent({const AQueue: TXSIDEventQueue;}
+		AEvent: PXSIDEvent);
 	begin
 	AEvent^.prev:= FQueue{s[AQueue]}.Tail;
 	AEvent^.next:= nil;
@@ -234,7 +237,7 @@ procedure TReSIDEventManager.DoAddEvent({const AQueue: TReSIDEventQueue;}
 	Inc(FQueue{s[AQueue]}.Count);
 	end;
 
-procedure TReSIDEventManager.DoClearQueueData{(const AQueue: TReSIDEventQueue)};
+procedure TXSIDEventManager.DoClearQueueData{(const AQueue: TXSIDEventQueue)};
 	begin
 	FQueue{s[AQueue]}.Head:= nil;
 	FQueue{s[AQueue]}.Tail:= nil;
@@ -244,20 +247,20 @@ procedure TReSIDEventManager.DoClearQueueData{(const AQueue: TReSIDEventQueue)};
 	FQueue{s[AQueue]}.TTL:= 0;
 	end;
 
-constructor TReSIDEventManager.Create;
+constructor TXSIDEventManager.Create;
 //	var
-//	q: TReSIDEventQueue;
+//	q: TXSIDEventQueue;
 
 	begin
 	inherited Create;
 
 //	FLock:= TCriticalSection.Create;
 
-//	for q:= Low(TReSIDEventQueue) to High(TReSIDEventQueue) do
+//	for q:= Low(TXSIDEventQueue) to High(TXSIDEventQueue) do
 		DoClearQueueData{(q)};
 	end;
 
-destructor TReSIDEventManager.Destroy;
+destructor TXSIDEventManager.Destroy;
 	begin
 //	ClearAllEvents;
 	ClearEvents;
@@ -267,20 +270,20 @@ destructor TReSIDEventManager.Destroy;
 	inherited Destroy;
 	end;
 
-//procedure TReSIDEventManager.Lock;
+//procedure TXSIDEventManager.Lock;
 //	begin
 //	FLock.Acquire;
 //	end;
 
-//procedure TReSIDEventManager.Unlock;
+//procedure TXSIDEventManager.Unlock;
 //	begin
 //	FLock.Release;
 //	end;
 
-procedure TReSIDEventManager.AddEvent({const AQueue: TReSIDEventQueue;}
+procedure TXSIDEventManager.AddEvent({const AQueue: TXSIDEventQueue;}
 		const AOffset: cycle_count; const AReg, AValue: reg8);
 	var
-	evt: PReSIDEvent;
+	evt: PXSIDEvent;
 
 	begin
 	evt:= CreateEvent(AOffset, AReg, AValue);
@@ -294,10 +297,10 @@ procedure TReSIDEventManager.AddEvent({const AQueue: TReSIDEventQueue;}
 //		end;
 	end;
 
-procedure TReSIDEventManager.InsertEvent({const AQueue: TReSIDEventQueue;}
+procedure TXSIDEventManager.InsertEvent({const AQueue: TXSIDEventQueue;}
 		const AOffset: cycle_count; const AReg, AValue: reg8);
 	var
-	evt: PReSIDEvent;
+	evt: PXSIDEvent;
 
 	begin
 	evt:= CreateEvent(AOffset, AReg, AValue);
@@ -338,7 +341,7 @@ procedure TReSIDEventManager.InsertEvent({const AQueue: TReSIDEventQueue;}
 //		end;
 	end;
 
-procedure TReSIDEventManager.CopyEvents({const AQueue: TReSIDEventQueue;}
+procedure TXSIDEventManager.CopyEvents({const AQueue: TXSIDEventQueue;}
 		const AList: TList);
 	var
 	i: Integer;
@@ -347,30 +350,33 @@ procedure TReSIDEventManager.CopyEvents({const AQueue: TReSIDEventQueue;}
 //	Lock;
 //	try
 		for i:= 0 to AList.Count - 1 do
-			DoAddEvent({AQueue, }PReSIDEvent(AList[i]));
+			DoAddEvent({AQueue, }PXSIDEvent(AList[i]));
 
 //		finally
 //		Unlock;
 //		end;
 	end;
 
-procedure TReSIDEventManager.ClearEvents{(const AQueue: TReSIDEventQueue)};
+procedure TXSIDEventManager.ClearEvents(const ARelease: Boolean){(const AQueue: TXSIDEventQueue)};
 	var
 	evt,
-	dis: PReSIDEvent;
+	dis: PXSIDEvent;
 
 	begin
 //	Lock;
 //	try
-		evt:= FQueue{s[AQueue]}.Tail;
-		if  Assigned(evt) then
-			repeat
-				dis:= evt;
-				evt:= evt^.prev;
+		if  ARelease then
+			begin
+			evt:= FQueue{s[AQueue]}.Tail;
+			if  Assigned(evt) then
+				repeat
+					dis:= evt;
+					evt:= evt^.prev;
 
-				GlobalEventPool.ReleaseEvent(dis);
+					GlobalEventPool.ReleaseEvent(dis);
 
-				until not Assigned(evt);
+					until not Assigned(evt);
+			end;
 
 		DoClearQueueData{(AQueue)};
 
@@ -379,14 +385,14 @@ procedure TReSIDEventManager.ClearEvents{(const AQueue: TReSIDEventQueue)};
 //		end;
 	end;
 
-//procedure TReSIDEventManager.ClearAllEvents;
+//procedure TXSIDEventManager.ClearAllEvents;
 //	var
-//	q: TReSIDEventQueue;
+//	q: TXSIDEventQueue;
 //
 //	begin
 //	Lock;
 //	try
-//		for q:= Low(TReSIDEventQueue) to High(TReSIDEventQueue) do
+//		for q:= Low(TXSIDEventQueue) to High(TXSIDEventQueue) do
 //			ClearEvents(q);
 //
 //		finally
@@ -394,14 +400,14 @@ procedure TReSIDEventManager.ClearEvents{(const AQueue: TReSIDEventQueue)};
 //		end;
 //	end;
 
-function TReSIDEventManager.Seek({const AQueue: TReSIDEventQueue;}
-		const AOffset: Integer; var AContext: TReSIDContext): Integer;
+function TXSIDEventManager.Seek({const AQueue: TXSIDEventQueue;}
+		const AOffset: Integer; var AContext: TXSIDContext): Integer;
 	var
 	i: Integer;
 
-	function DoGetNextEvent{(AQueue: TReSIDEventQueue)}: Boolean;
+	function DoGetNextEvent{(AQueue: TXSIDEventQueue)}: Boolean;
 		var
-		nxt: PReSIDEvent;
+		nxt: PXSIDEvent;
 
 		begin
 		if  FQueue{s[AQueue]}.Index < 0 then
@@ -459,17 +465,17 @@ function TReSIDEventManager.Seek({const AQueue: TReSIDEventQueue;}
 		end;
 	end;
 
-procedure TReSIDEventManager.Clock(const ATicks: cycle_count;
-		var ADeltaT: cycle_count; var AEvents: TReSIDEventArr);
+procedure TXSIDEventManager.Clock(const ATicks: cycle_count;
+		var ADeltaT: cycle_count; var AEvents: TXSIDEventArr);
 	var
-//	i: TReSIDEventQueue;
-//	d: array[TReSIDEventQueue] of Boolean;
+//	i: TXSIDEventQueue;
+//	d: array[TXSIDEventQueue] of Boolean;
 	d: Boolean;
 	t: cycle_count;
 
-	function DoGetNextEvent{(AQueue: TReSIDEventQueue)}: Boolean;
+	function DoGetNextEvent{(AQueue: TXSIDEventQueue)}: Boolean;
 		var
-		nxt: PReSIDEvent;
+		nxt: PXSIDEvent;
 
 		begin
 		if  FQueue{s[AQueue]}.Index < 0 then
@@ -495,7 +501,7 @@ procedure TReSIDEventManager.Clock(const ATicks: cycle_count;
 			end;
 		end;
 
-	procedure DoNextEvent{(const AQueue: TReSIDEventQueue)};
+	procedure DoNextEvent{(const AQueue: TXSIDEventQueue)};
 //		var
 //		evt: PReSIDEvent;
 
@@ -529,7 +535,7 @@ procedure TReSIDEventManager.Clock(const ATicks: cycle_count;
 			end;
 		end;
 
-	procedure DoExpireEvent({const AQueue: TReSIDEventQueue;}
+	procedure DoExpireEvent({const AQueue: TXSIDEventQueue;}
 			ATicks: cycle_count);
 		var
 		doEvent: Boolean;
@@ -576,17 +582,17 @@ procedure TReSIDEventManager.Clock(const ATicks: cycle_count;
 
 //	Lock;
 //	try
-//		for i:= Low(TReSIDEventQueue) to High(TReSIDEventQueue) do
+//		for i:= Low(TXSIDEventQueue) to High(TXSIDEventQueue) do
 			d{[i]}:= FQueue{s[i]}.TTL > 0;
 
-//		for i:= Low(TReSIDEventQueue) to High(TReSIDEventQueue) do
+//		for i:= Low(TXSIDEventQueue) to High(TXSIDEventQueue) do
 			if  FQueue{s[i]}.TTL = 0 then
 				d{[i]}:= DoGetNextEvent{(i)};
 
 //Hmm..  What's this?  Already commented out...
 //		d:= FQueues[reqPattern].TTL > 0;
 
-//		for i:= Low(TReSIDEventQueue) to High(TReSIDEventQueue) do
+//		for i:= Low(TXSIDEventQueue) to High(TXSIDEventQueue) do
 			if d{[i]} then
 				if FQueue{s[i]}.TTL < t then
 					t:= FQueue{s[i]}.TTL;
@@ -596,7 +602,7 @@ procedure TReSIDEventManager.Clock(const ATicks: cycle_count;
 
 	ADeltaT:= t;
 
-//	for i:= Low(TReSIDEventQueue) to High(TReSIDEventQueue) do
+//	for i:= Low(TXSIDEventQueue) to High(TXSIDEventQueue) do
 //		begin
 		if  d{[i]} then
 			DoExpireEvent({i, }t);
@@ -608,9 +614,9 @@ procedure TReSIDEventManager.Clock(const ATicks: cycle_count;
 
 
 
-{ TReSIDStatsThread }
+{ TXSIDStatsThread }
 
-procedure TReSIDStatsThread.UpdateMainThread;
+procedure TXSIDStatsThread.UpdateMainThread;
 	var
 //	s: string;
 	hr1,
@@ -648,7 +654,7 @@ procedure TReSIDStatsThread.UpdateMainThread;
 //			FStats.fps:= -1;
 
 		if  Assigned(FCallback) then
-			FCallback(FStats);
+			FCallback(FID, FStats);
 
 		FStats.ThsTick:= 0;
 
@@ -657,7 +663,7 @@ procedure TReSIDStatsThread.UpdateMainThread;
 		end;
 	end;
 
-procedure TReSIDStatsThread.Execute;
+procedure TXSIDStatsThread.Execute;
 	begin
 	while not Terminated do
 		begin
@@ -667,14 +673,15 @@ procedure TReSIDStatsThread.Execute;
 		end;
 	end;
 
-constructor TReSIDStatsThread.Create(const AConfig: TReSIDConfig;
-		const ACallback: TReSIDStatsCallback);
+constructor TXSIDStatsThread.Create(const AConfig: TXSIDConfig;
+		const ACallback: TXSIDStatsCallback; const AID: Integer);
 	begin
 	FLock:= TCriticalSection.Create;
 
 	FStats.fps:= -1.0;
 	FStats.ThsTick:= 0;
 	FCallback:= ACallback;
+	FID:= AID;
 
 	FThen:= Now;
 	FUpdates:= 0;
@@ -682,9 +689,10 @@ constructor TReSIDStatsThread.Create(const AConfig: TReSIDConfig;
 	FSleepTime:= 1 / (ARR_VAL_SYSRFRSHPS[AConfig.System] / 1000);
 
 	inherited Create(False);
+	FreeOnTerminate:= True;
 	end;
 
-destructor TReSIDStatsThread.Destroy;
+destructor TXSIDStatsThread.Destroy;
 	begin
 //	FLogFile.Free;
 	FLock.Free;
@@ -692,9 +700,9 @@ destructor TReSIDStatsThread.Destroy;
 	inherited Destroy;
 	end;
 
-procedure TReSIDStatsThread.UpdateFrontEnd(DeltaT, Ticks: cycle_count;
-		Perf: TReSIDFloat; CmpOffs, BufSize, EventCount, EventIdx: Integer;
-		peak: TReSIDFloat; clipped: Boolean);
+procedure TXSIDStatsThread.UpdateFrontEnd(DeltaT, Ticks: cycle_count;
+		Perf: TXSIDFloat; CmpOffs, BufSize, EventCount, EventIdx: Integer;
+		peak: TXSIDFloat; clipped: Boolean);
 	begin
 //	if  FLock.TryEnter then
 	FLock.Acquire;
@@ -714,16 +722,16 @@ procedure TReSIDStatsThread.UpdateFrontEnd(DeltaT, Ticks: cycle_count;
 			end;
 	end;
 
-{ TReSIDThread }
+{ TXSIDThread }
 
-procedure TReSIDThread.DoConstruction;
+procedure TXSIDThread.DoConstruction;
 	var
 	sl: TStringList;
-	r: TReSIDAudioRendererClass;
+	r: TXSIDAudioRendererClass;
 	rm: TRoundingMode;
 
 	begin
-	FName:= 'ReSID';
+	FName:= 'XSID';
 
 	rm:= GetRoundMode;
 //	SetRoundMode(rmNearest);
@@ -777,6 +785,8 @@ procedure TReSIDThread.DoConstruction;
 			sl.Free;
 			end;
 
+		FFreeRun:= not FAudio.GetIsRealTime;
+
 		SetLength(FEventData, 0);
 
 		FReSID:= ReSIDCreate;
@@ -795,7 +805,7 @@ procedure TReSIDThread.DoConstruction;
 		else
 			ReSIDInput(FReSID, 0);
 
-		FStatsThrd:= TReSIDStatsThread.Create(FConfig, FCallback);
+		FStatsThrd:= TXSIDStatsThread.Create(FConfig, FCallback, FID);
 
 //		finally
 //		Unlock;
@@ -806,7 +816,7 @@ procedure TReSIDThread.DoConstruction;
 	FConfig.Started:= True;
 	end;
 
-procedure TReSIDThread.DoDestruction;
+procedure TXSIDThread.DoDestruction;
 	begin
 //	Not sure if I need to lock it really...
 //	FLock.Acquire;
@@ -817,41 +827,32 @@ procedure TReSIDThread.DoDestruction;
 
 		SetLength(FEventData, 0);
 
-		FStatsThrd.Terminate;
-		FStatsThrd.WaitFor;
-		FStatsThrd.Free;
-
-		ReSIDDestroy(FReSID);
-
 		FAudio.Free;
 
-		FConfig.Started:= False;
+		FStatsThrd.Terminate;
+//		FStatsThrd.WaitFor;
+//		FStatsThrd.Free;
+
+		ReSIDDestroy(FReSID);
 
 //		finally
 //		FLock.Release;
 //		end;
 	end;
 
-procedure TReSIDThread.DoPause;
+procedure TXSIDThread.DoPause;
 	begin
+	FConfig.Started:= False;
 	FAudio.Pause(FBuffer);
 	end;
 
-procedure TReSIDThread.DoPlay;
-	var
-	t: cycle_count;
-
+procedure TXSIDThread.DoPlay;
 	begin
+	FConfig.Started:= True;
 	FAudio.Play(FBuffer);
-	if  FZoomCycles > 0 then
-		begin
-		ReSIDClockSilent(FReSID, FZoomCycles);
-		GlobalEvents.Clock(FZoomCycles, t, FEventData);
-		FZoomCycles:= 0;
-		end;
 	end;
 
-procedure TReSIDThread.RestoreContext(AContext: TReSIDContext);
+procedure TXSIDThread.RestoreContext(AContext: TXSIDContext);
 	var
 	i: Integer;
 
@@ -881,7 +882,7 @@ procedure TReSIDThread.RestoreContext(AContext: TReSIDContext);
 			end;
 	end;
 
-procedure TReSIDThread.DoClock(const ATicks: Cardinal);
+procedure TXSIDThread.DoClock(const ATicks: Cardinal);
 	var
 	t: cycle_count;
 	i,
@@ -897,7 +898,7 @@ procedure TReSIDThread.DoClock(const ATicks: Cardinal);
 	FLstTick:= ATicks;
 	while (FLstTick > 0) and (not Terminated) do
 		begin
-		GlobalEvents.Clock(FLstTick, t, FEventData);
+		FEvents.Clock(FLstTick, t, FEventData);
 		Dec(FLstTick, t);
 
 		UpdateFrontEnd(t);
@@ -947,7 +948,7 @@ procedure TReSIDThread.DoClock(const ATicks: Cardinal);
 	FThsTick:= 0;
 	end;
 
-procedure TReSIDThread.UpdateFrontEnd(const ATicks: Cardinal);
+procedure TXSIDThread.UpdateFrontEnd(const ATicks: Cardinal);
 	var
 	p: Single;
 
@@ -968,21 +969,24 @@ procedure TReSIDThread.UpdateFrontEnd(const ATicks: Cardinal);
 //		end;
 	end;
 
-procedure TReSIDThread.Zoom(const ACycles: Cardinal);
-	begin
-	FZoomCycles:= ACycles;
-	end;
-
-constructor TReSIDThread.Create(const AConfig: TReSIDConfig;
-		const ACallback: TReSIDStatsCallback);
+constructor TXSIDThread.Create(const AConfig: TXSIDConfig;
+		const ACallback: TXSIDStatsCallback; const AID: Integer;
+		const AEvents: TXSIDEventManager);
 	begin
 	FConfig:= AConfig;
 	FCallback:= ACallback;
+	FID:= AID;
+	if  not Assigned(AEvents) then
+		FEvents:= GlobalEvents
+	else
+		FEvents:= AEvents;
 
 	inherited Create(FConfig.System, FConfig.UpdateRate);
+
+	FreeOnTerminate:= True;
 	end;
 
-procedure TReSIDThread.SetEnabled(const AVoice: reg8; const AEnable: Boolean);
+procedure TXSIDThread.SetEnabled(const AVoice: reg8; const AEnable: Boolean);
 	begin
 //	Lock;
 //	try
@@ -994,7 +998,7 @@ procedure TReSIDThread.SetEnabled(const AVoice: reg8; const AEnable: Boolean);
 //		end;
 	end;
 
-procedure TReSIDThread.SetGain(AValue: reg8);
+procedure TXSIDThread.SetGain(AValue: reg8);
 	begin
 //	Lock;
 //	try

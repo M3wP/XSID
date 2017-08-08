@@ -1,19 +1,11 @@
-program XSIDPlay;
+program XSIDToMIDI;
 
 uses
   Vcl.Forms,
-  FormXSIDPlayMain in 'FormXSIDPlayMain.pas' {XSIDPlayMainForm},
-  C64Thread in 'C64Thread.pas',
+  FormXSIDToMIDIMain in 'FormXSIDToMIDIMain.pas' {XSIDToMIDIMainForm},
+  FormFileLoad in 'FormFileLoad.pas' {FileLoadForm},
   C64Types in 'C64Types.pas',
-  DirectSound in 'DirectSound.pas',
-  DXTypes in 'DXTypes.pas',
-  LibReSIDFP in 'LibReSIDFP.pas',
-  ReSIDFiles in 'ReSIDFiles.pas',
-  ReSIDThread in 'ReSIDThread.pas',
-  ReSIDTypes in 'ReSIDTypes.pas',
-  ReSIDAudioDSound in 'ReSIDAudioDSound.pas',
-  FormReSIDConfig in 'FormReSIDConfig.pas' {ReSIDConfigForm},
-  FormReSIDFilterConfig in 'FormReSIDFilterConfig.pas' {ReSIDFilterConfigForm},
+  XSIDFiles in 'XSIDFiles.pas',
   ULZBinTree in '..\LZMA.442b\compression\LZ\ULZBinTree.pas',
   ULZInWindow in '..\LZMA.442b\compression\LZ\ULZInWindow.pas',
   ULZOutWindow in '..\LZMA.442b\compression\LZ\ULZOutWindow.pas',
@@ -25,13 +17,23 @@ uses
   UBitTreeEncoder in '..\LZMA.442b\compression\RangeCoder\UBitTreeEncoder.pas',
   URangeDecoder in '..\LZMA.442b\compression\RangeCoder\URangeDecoder.pas',
   URangeEncoder in '..\LZMA.442b\compression\RangeCoder\URangeEncoder.pas',
-  ReSIDAudioDump in 'ReSIDAudioDump.pas';
+  XSIDTypes in 'XSIDTypes.pas',
+  XSIDAudioDump in 'XSIDAudioDump.pas',
+  XSIDToMIDITypes in 'XSIDToMIDITypes.pas',
+  XSIDThread in 'XSIDThread.pas',
+  C64Thread in 'C64Thread.pas',
+  LibReSIDFP in 'LibReSIDFP.pas',
+  FormDumpProgress in 'FormDumpProgress.pas' {DumpProgressForm},
+  FormMIDIMapping in 'FormMIDIMapping.pas' {MIDIMappingForm};
 
 {$R *.res}
 
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.CreateForm(TXSIDPlayMainForm, XSIDPlayMainForm);
+  Application.CreateForm(TXSIDToMIDIMainForm, XSIDToMIDIMainForm);
+  Application.CreateForm(TFileLoadForm, FileLoadForm);
+  Application.CreateForm(TDumpProgressForm, DumpProgressForm);
+  Application.CreateForm(TMIDIMappingForm, MIDIMappingForm);
   Application.Run;
 end.

@@ -1,6 +1,6 @@
-unit ReSIDFiles;
+unit XSIDFiles;
 
-{$INCLUDE ReSID.inc}
+{$INCLUDE XSID.inc}
 
 interface
 
@@ -9,7 +9,7 @@ uses
 	C64Types;
 
 type
-	TXSIDConfig = class
+	TXSIDFileConfig = class
 //		System settings
 		System: TC64SystemType;
 		UpdateRate: TC64UpdateRate;
@@ -39,21 +39,21 @@ type
 	end;
 
 
-	TReSIDFileStage = (rfsPrepare, rfsLoad, rfsInitialise);
+	TXSIDFileStage = (rfsPrepare, rfsLoad, rfsInitialise);
 
-	TReSIDFileCallback = procedure(const AStage: TReSIDFileStage;
+	TXSIDFileCallback = procedure(const AStage: TXSIDFileStage;
 			const APosition, ASize: Int64) of object;
 
 
-function ReSIDLoadFileXSID(const AFileName: string; const AEvents: TList;
-		const ACallback: TReSIDFileCallback; out AXSIDConfig: TXSIDConfig): Cardinal;
+function XSIDLoadFileXSID(const AFileName: string; const AEvents: TList;
+		const ACallback: TXSIDFileCallback; out AXSIDConfig: TXSIDFileConfig): Cardinal;
 
 
 implementation
 
 uses
-	SysUtils, ReSIDTypes, SyncObjs,
-	{$IFDEF DCC}
+	SysUtils, XSIDTypes, SyncObjs,
+{$IFDEF DCC}
 	zlib,
 {$ELSE}
 	zstream,
@@ -98,7 +98,7 @@ type
 		procedure Execute; override;
 	public
 		constructor Create(AEvent: TEvent; AInput, AOutput: TStream);
-    end;
+	end;
 
 
 procedure VarLenToCard(const AValue: array of Byte; var AResult: Cardinal);
@@ -124,8 +124,8 @@ procedure VarLenToCard(const AValue: array of Byte; var AResult: Cardinal);
 		end;
 	end;
 
-function ReSIDLoadFileXSID(const AFileName: string; const AEvents: TList;
-		const ACallback: TReSIDFileCallback; out AXSIDConfig: TXSIDConfig): Cardinal;
+function XSIDLoadFileXSID(const AFileName: string; const AEvents: TList;
+		const ACallback: TXSIDFileCallback; out AXSIDConfig: TXSIDFileConfig): Cardinal;
 	var
 	ts: array[0..3] of TMemoryStream;
 	fs: TFileStream;
@@ -133,7 +133,7 @@ function ReSIDLoadFileXSID(const AFileName: string; const AEvents: TList;
 	de: array[0..3] of TEvent;
 //	ld: array[0..3] of TLZMADecoder;
 	ls: array[0..3] of TMemoryStream;
-	ev: PReSIDEvent;
+	ev: PXSIDEvent;
 	o: array[0..3] of cycle_count;
 	r,
 	v: array[0..3] of reg8;
@@ -241,7 +241,7 @@ function ReSIDLoadFileXSID(const AFileName: string; const AEvents: TList;
 	begin
 	Result:= 0;
 
-	AXSIDConfig:= TXSIDConfig.Create;
+	AXSIDConfig:= TXSIDFileConfig.Create;
 
 //dengland	If not using the threads, need this somewhere
 //	ULZBinTree.InitCRC;
@@ -451,7 +451,7 @@ function ReSIDLoadFileXSID(const AFileName: string; const AEvents: TList;
 
 { TXSIDConfig }
 
-constructor TXSIDConfig.Create;
+constructor TXSIDFileConfig.Create;
 	begin
 	inherited Create;
 
@@ -459,7 +459,7 @@ constructor TXSIDConfig.Create;
 	MetaData:= TStringList.Create;
 	end;
 
-destructor TXSIDConfig.Destroy;
+destructor TXSIDFileConfig.Destroy;
 	begin
 	MetaData.Free;
 	SIDParams.Free;
@@ -467,7 +467,7 @@ destructor TXSIDConfig.Destroy;
 	inherited;
 	end;
 
-procedure TXSIDConfig.ParseMetaData;
+procedure TXSIDFileConfig.ParseMetaData;
 	var
 	i: Integer;
 
@@ -496,7 +496,7 @@ procedure TXSIDConfig.ParseMetaData;
 			MetaData.Delete(i);
 	end;
 
-procedure TXSIDConfig.ParseSIDParams;
+procedure TXSIDFileConfig.ParseSIDParams;
 	var
 	i: Integer;
 	d: Double;

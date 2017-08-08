@@ -1,6 +1,6 @@
-unit ReSIDTypes;
+unit XSIDTypes;
 
-{$INCLUDE ReSID.inc}
+{$INCLUDE XSID.inc}
 
 interface
 
@@ -11,31 +11,31 @@ const
 	VAL_MAX_BUFFERSIZE = 65536;
 
 type
-	TReSIDSampleRate = (rsr11025, rsr22050, rsr44100, rsr48000, rsr96000);
-	TReSIDBufferSize = (rsbImmediate, rsbTiny, rsbSmall, rsbMedium, rsbLarge,
+	TXSIDSampleRate = (rsr11025, rsr22050, rsr44100, rsr48000, rsr96000);
+	TXSIDBufferSize = (rsbImmediate, rsbTiny, rsbSmall, rsbMedium, rsbLarge,
 			rsbExtra, rsbHuge);
 //	sampling_method = (SAMPLE_INTERPOLATE = 1, SAMPLE_RESAMPLE_INTERPOLATE);
-	TReSIDInterpolation = (rsiDecimate = 1, rsiResample);
+	TXSIDInterpolation = (rsiDecimate = 1, rsiResample);
 
-	TReSIDModelType3 = (rm3R2, rm3R4);
-	TReSIDModelType4 = (rm4R5);
+	TXSIDModelType3 = (rm3R2, rm3R4);
+	TXSIDModelType4 = (rm4R5);
 
 //dengland Added these
-	PReSIDFloat = ^TReSIDFloat;
-	TReSIDFloat = TC64Float;
-//	PArrReSIDFloat = ^TArrReSIDFloat;
-//	TArrReSIDFloat = array[0..VAL_MAX_BUFFERSIZE - 1] of TReSIDFloat;
+	PXSIDFloat = ^TXSIDFloat;
+	TXSIDFloat = TC64Float;
+//	PArrXSIDFloat = ^TArrRXSIDFloat;
+//	TArrXSIDFloat = array[0..VAL_MAX_BUFFERSIZE - 1] of TXSIDFloat;
 	PArrSmallInt = ^TArrSmallInt;
 	TArrSmallInt = array[0..VAL_MAX_BUFFERSIZE - 1] of SmallInt;
 
-//	TArrDac = array[0..11] of TReSIDFloat;
+//	TArrDac = array[0..11] of TXSIDFloat;
 
-	TReSIDCtxReg = record
+	TXSIDCtxReg = record
 		isUsed: Boolean;
 		value: Byte;
 	end;
 
-	TReSIDContext = array[0..24] of TReSIDCtxReg;
+	TXSIDContext = array[0..24] of TXSIDCtxReg;
 
 
 const
@@ -43,26 +43,26 @@ const
 //	M_PI = 3.14159265358979323846;
 //	M_LN2 = 0.69314718055994530942;
 
-	ARR_VAL_TYPE3PROPS: array[TReSIDModelType3] of Double = (
+	ARR_VAL_TYPE3PROPS: array[TXSIDModelType3] of Double = (
 //		rm3R2
 		0.01,
 //      rm3R4
 		0.50);
 
-	ARR_VAL_TYPE4PROPS: array[TReSIDModelType4] of Double = (
+	ARR_VAL_TYPE4PROPS: array[TXSIDModelType4] of Double = (
 //		rm4R5
 		12500);
 
-	ARR_STR_MODELTYPE3: array[TReSIDModelType3] of string = (
+	ARR_STR_MODELTYPE3: array[TXSIDModelType3] of string = (
 			'R2', 'R4');
 
-	ARR_STR_MODELTYPE4: array[TReSIDModelType4] of string = (
+	ARR_STR_MODELTYPE4: array[TXSIDModelType4] of string = (
 			'R5');
 
-	ARR_VAL_SAMPLERATE: array[TReSIDSampleRate] of Cardinal = (
+	ARR_VAL_SAMPLERATE: array[TXSIDSampleRate] of Cardinal = (
 			11025, 22050, 44100, 48000, 96000);
 
-	ARR_VAL_BUFFERFACT: array[TReSIDBufferSize] of Cardinal = (
+	ARR_VAL_BUFFERFACT: array[TXSIDBufferSize] of Cardinal = (
 			1, 2, 4, 6, 8, 12, 16);
 
 	VAL_DEF_FILTENABLE = True;
@@ -203,24 +203,24 @@ const
 
 
 type
-{ TReSIDEventPool }
+{ TXSIDEventPool }
 
-	TReSIDEventData = record
+	TXSIDEventData = record
 		reg,
 		val: reg8;
 	end;
 
-	TReSIDEventArr = array of TReSIDEventData;
+	TXSIDEventArr = array of TXSIDEventData;
 
-	PReSIDEvent = ^TReSIDEvent;
-	TReSIDEvent = record
+	PXSIDEvent = ^TXSIDEvent;
+	TXSIDEvent = record
 		offs: cycle_count;
-		data: TReSIDEventData;
+		data: TXSIDEventData;
 		next,
-		prev: PReSIDEvent;
+		prev: PXSIDEvent;
 	end;
 
-	TReSIDEventPool = class(TObject)
+	TXSIDEventPool = class(TObject)
 	protected
 		FLock: TCriticalSection;
 		FAllocList: TList;
@@ -230,23 +230,24 @@ type
 		constructor Create;
 		destructor  Destroy; override;
 
-		function  AllocateEvent: PReSIDEvent;
-		procedure ReleaseEvent(AEvent: PReSIDEvent);
+		function  AllocateEvent: PXSIDEvent;
+		procedure ReleaseEvent(AEvent: PXSIDEvent);
 		procedure Clear;
 	end;
 
-{ TReSIDAudioRenderer }
+{ TXSIDAudioRenderer }
 
-	TReSIDAudioRenderer = class(TObject)
+	TXSIDAudioRenderer = class(TObject)
 	public
-		constructor Create(const ASampleRate: TReSIDSampleRate;
+		constructor Create(const ASampleRate: TXSIDSampleRate;
 				const AFrameRate: Cardinal;
-				const ABufferSize: TReSIDBufferSize;
+				const ABufferSize: TXSIDBufferSize;
 				const AParams: TStrings; var ABuffer: PArrSmallInt); virtual;
 
 		class function  GetName: AnsiString; virtual; abstract;
 		class function  GetRequireAllData: Boolean; virtual;
 		class function  GetWantPlatformDefault: Boolean; virtual;
+		class function  GetIsRealTime: Boolean; virtual;
 
 		class procedure FillParameterNames(const AStrings: TStrings); virtual;
 
@@ -261,42 +262,43 @@ type
 		property  Name: AnsiString read GetName;
 		property  RequireAllData: Boolean read GetRequireAllData;
 		property  WantPlatformDefault: Boolean read GetWantPlatformDefault;
+		property  IsRealTime: Boolean read GetIsRealTime;
 	end;
 
-	TReSIDAudioRendererClass = class of TReSIDAudioRenderer;
+	TXSIDAudioRendererClass = class of TXSIDAudioRenderer;
 
-{ TReSIDAudioRenderers }
+{ TXSIDAudioRenderers }
 
-	TReSIDAudioRenderers = class(TObject)
+	TXSIDAudioRenderers = class(TObject)
 	private
 		FList: TList;
 
 	protected
 		function  GetCount: Integer;
-		function  GetItem(AIndex: Integer): TReSIDAudioRendererClass;
-		procedure AddItem(const AItem: TReSIDAudioRendererClass);
-		function  GetDefaultRenderer: TReSIDAudioRendererClass;
+		function  GetItem(AIndex: Integer): TXSIDAudioRendererClass;
+		procedure AddItem(const AItem: TXSIDAudioRendererClass);
+		function  GetDefaultRenderer: TXSIDAudioRendererClass;
 
 	public
 		constructor Create;
 		destructor  Destroy; override;
 
-		function  IndexOf(const AItem: TReSIDAudioRendererClass): Integer;
-		function  ItemByName(const AName: AnsiString): TReSIDAudioRendererClass;
+		function  IndexOf(const AItem: TXSIDAudioRendererClass): Integer;
+		function  ItemByName(const AName: AnsiString): TXSIDAudioRendererClass;
 
 		property  Count: Integer read GetCount;
-		property  Items[AIndex: Integer]: TReSIDAudioRendererClass read GetItem; default;
-		property  DefaultRenderer: TReSIDAudioRendererClass read GetDefaultRenderer;
+		property  Items[AIndex: Integer]: TXSIDAudioRendererClass read GetItem; default;
+		property  DefaultRenderer: TXSIDAudioRendererClass read GetDefaultRenderer;
 	end;
 
-{ TReSIDConfig }
-	TReSIDConfig = class;
+{ TXSIDConfig }
+	TXSIDConfig = class;
 
-{ TReSIDConfigFilter }
+{ TXSIDConfigFilter }
 
-	TReSIDConfigFilter = class(TObject)
+	TXSIDConfigFilter = class(TObject)
 	protected
-		FOwner: TReSIDConfig;
+		FOwner: TXSIDConfig;
 		FCustom: Boolean;
 
 		procedure SetChanged(AValue: Boolean);
@@ -310,20 +312,20 @@ type
 		procedure DoSetTypeSettings; virtual; abstract;
 		procedure DoSetSystemDefaults; virtual;
 
-		procedure DoAssign(AFilter: TReSIDConfigFilter); virtual; abstract;
-		procedure Assign(AFilter: TReSIDConfigFilter);
+		procedure DoAssign(AFilter: TXSIDConfigFilter); virtual; abstract;
+		procedure Assign(AFilter: TXSIDConfigFilter);
 
 		procedure LoadFromIniFile(const AIniFile: TIniFile); virtual; abstract;
 		procedure SaveToIniFile(const AIniFile: TIniFile); virtual; abstract;
 
 	public
-		constructor  Create(AOwner: TReSIDConfig); virtual;
+		constructor  Create(AOwner: TXSIDConfig); virtual;
 
-		property  Owner: TReSIDConfig read FOwner;
+		property  Owner: TXSIDConfig read FOwner;
 		property  Custom: Boolean read GetCustom write SetCustom;
 	end;
 
-	TReSIDConfig = class(TObject)
+	TXSIDConfig = class(TObject)
 	protected
 		FLock: TCriticalSection;
 
@@ -344,9 +346,9 @@ type
 //		Audio interface
 		FRenderer: AnsiString;
 		FRenderParams: TStringList;
-		FSampleRate: TReSIDSampleRate;
-		FBufferSize: TReSIDBufferSize;
-		FInterpolation: TReSIDInterpolation;
+		FSampleRate: TXSIDSampleRate;
+		FBufferSize: TXSIDBufferSize;
+		FInterpolation: TXSIDInterpolation;
 
 //		Utility interface
 		function  GetStarted: Boolean;
@@ -376,19 +378,19 @@ type
 		function  GetDigiBoostEnable: Boolean;
 
 		function  GetCyclesPerSec: Cardinal;
-		function  GetRefreshPerSec: TReSIDFloat;
-		function  GetFreqFactor: TReSIDFloat;
+		function  GetRefreshPerSec: TXSIDFloat;
+		function  GetFreqFactor: TXSIDFloat;
 
 //		Audio interface
 		procedure SetRenderer(AValue: AnsiString);
 		function  GetRenderer: AnsiString;
 
-		procedure SetSampleRate(AValue: TReSIDSampleRate);
-		function  GetSampleRate: TReSIDSampleRate;
-		procedure SetBufferSize(AValue: TReSIDBufferSize);
-		function  GetBufferSize: TReSIDBufferSize;
-		procedure SetInterpolation(AValue: TReSIDInterpolation);
-		function  GetInterpolation: TReSIDInterpolation;
+		procedure SetSampleRate(AValue: TXSIDSampleRate);
+		function  GetSampleRate: TXSIDSampleRate;
+		procedure SetBufferSize(AValue: TXSIDBufferSize);
+		function  GetBufferSize: TXSIDBufferSize;
+		procedure SetInterpolation(AValue: TXSIDInterpolation);
+		function  GetInterpolation: TXSIDInterpolation;
 
 	public
 		constructor Create(const AIniFile: TIniFile = nil);
@@ -397,7 +399,7 @@ type
 		procedure Lock;
 		procedure Unlock;
 
-		procedure Assign(AConfig: TReSIDConfig);
+		procedure Assign(AConfig: TXSIDConfig);
 
 //dengland This will have to do for the time being.  Use with care!
 		procedure SetRenderParams(const AStrings: TStrings);
@@ -423,18 +425,18 @@ type
 				read GetDigiBoostEnable write SetDigiBoostEnable;
 
 		property  CyclesPerSec: Cardinal read GetCyclesPerSec;
-		property  RefreshPerSec: TReSIDFloat read GetRefreshPerSec;
-		property  FreqFactor: TReSIDFloat read GetFreqFactor;
+		property  RefreshPerSec: TXSIDFloat read GetRefreshPerSec;
+		property  FreqFactor: TXSIDFloat read GetFreqFactor;
 
 //		Audio interface
 		property  Renderer: AnsiString read GetRenderer write SetRenderer;
 //dengland Need proper interface for params...
 
-		property  SampleRate: TReSIDSampleRate
+		property  SampleRate: TXSIDSampleRate
 				read GetSampleRate write SetSampleRate;
-		property  BufferSize: TReSIDBufferSize
+		property  BufferSize: TXSIDBufferSize
 				read GetBufferSize write SetBufferSize;
-		property  Interpolation: TReSIDInterpolation
+		property  Interpolation: TXSIDInterpolation
 				read GetInterpolation write SetInterpolation;
 	end;
 
@@ -445,27 +447,23 @@ var
 //todo Check the usage of these globals
 //	wave.h
 //	dac: TArrDac;
-//	wftable: array[0..10, 0..4095] of TReSIDFloat;
+//	wftable: array[0..10, 0..4095] of TXSIDFloat;
 //	envelope.h
-//	env_dac: array[0..255] of TReSIDFloat;
+//	env_dac: array[0..255] of TXSIDFloat;
 
-	GlobalEventPool: TReSIDEventPool;
+	GlobalEventPool: TXSIDEventPool;
 
 
-//dengland Moved in here from sid.cc since its static and used everywhere
-//function kinked_dac(const x: Integer; const nonlinearity: TReSIDFloat;
-//		const max: Integer): TReSIDFloat;
-
-function  CreateEvent(AOffset: cycle_count; AReg, AValue: reg8): PReSIDEvent;
-procedure AssignEvent(var ATarget: TReSIDEvent; ASource: TReSIDEvent);
+function  CreateEvent(AOffset: cycle_count; AReg, AValue: reg8): PXSIDEvent;
+procedure AssignEvent(var ATarget: TXSIDEvent; ASource: TXSIDEvent);
 
 procedure InitialiseConfig(const AIniFileName: string);
 procedure FinaliseConfig(const AIniFileName: string);
 
-procedure RegisterRenderer(const ARenderer: TReSIDAudioRendererClass);
+procedure RegisterRenderer(const ARenderer: TXSIDAudioRendererClass);
 
-function  GlobalConfig: TReSIDConfig;
-function  GlobalRenderers: TReSIDAudioRenderers;
+function  GlobalConfig: TXSIDConfig;
+function  GlobalRenderers: TXSIDAudioRenderers;
 
 
 implementation
@@ -481,39 +479,12 @@ uses
 	System.AnsiStrings,
 {$ENDIF}
 //dengland Include this so that the dump renderer is always the first in the list.
-	ReSIDAudioDump;
+	XSIDAudioDump;
 
 var
-	FGlobalConfig: TReSIDConfig;
-	FGlobalRenderers: TReSIDAudioRenderers;
+	FGlobalConfig: TXSIDConfig;
+	FGlobalRenderers: TXSIDAudioRenderers;
 
-
-//function kinked_dac(const x: Integer; const nonlinearity: TReSIDFloat;
-//		const max: Integer): TReSIDFloat;
-//	var
-//	i: Integer;
-//	value,
-//	weight,
-//	dir: TReSIDFloat;
-//	bit_: Integer;
-//
-//	begin
-//	value:= 0.0;
-//
-//	bit_:= 1;
-//	weight:= 1.0;
-//	dir:= 2.0 * nonlinearity;
-//
-//	for i:= 0 to (max - 1) do
-//		begin
-//		if  (x and bit_) <> 0 then
-//			value:= value + weight;
-//		bit_:= bit_ shl 1;
-//		weight:= weight * dir;
-//		end;
-//
-//	Result:= value / (weight / nonlinearity / nonlinearity) * (1 shl max);
-//	end;
 
 procedure InitialiseConfig(const AIniFileName: string);
 	var
@@ -527,7 +498,7 @@ procedure InitialiseConfig(const AIniFileName: string);
 		else
 			ini:= nil;
 		try
-			FGlobalConfig:= TReSIDConfig.Create(ini);
+			FGlobalConfig:= TXSIDConfig.Create(ini);
 
 			finally
 			if  Assigned(ini) then
@@ -557,21 +528,21 @@ procedure FinaliseConfig(const AIniFileName: string);
 procedure DoCheckGlobalRenderers;
 	begin
 	if not Assigned(FGlobalRenderers) then
-		FGlobalRenderers:= TReSIDAudioRenderers.Create;
+		FGlobalRenderers:= TXSIDAudioRenderers.Create;
 	end;
 
-function  GlobalConfig: TReSIDConfig;
+function  GlobalConfig: TXSIDConfig;
 	begin
 	Result:= FGlobalConfig;
 	end;
 
-function  GlobalRenderers: TReSIDAudioRenderers;
+function  GlobalRenderers: TXSIDAudioRenderers;
 	begin
 	Result:= FGlobalRenderers;
 	end;
 
 
-function CreateEvent(AOffset: cycle_count; AReg, AValue: reg8): PReSIDEvent;
+function CreateEvent(AOffset: cycle_count; AReg, AValue: reg8): PXSIDEvent;
 	begin
 	Result:= GlobalEventPool.AllocateEvent;
 
@@ -583,7 +554,7 @@ function CreateEvent(AOffset: cycle_count; AReg, AValue: reg8): PReSIDEvent;
 	Result^.prev:= nil;
 	end;
 
-procedure AssignEvent(var ATarget: TReSIDEvent; ASource: TReSIDEvent);
+procedure AssignEvent(var ATarget: TXSIDEvent; ASource: TXSIDEvent);
 	begin
 	ATarget.offs:= ASource.offs;
 	ATarget.data.reg:= ASource.data.reg;
@@ -594,26 +565,26 @@ procedure AssignEvent(var ATarget: TReSIDEvent; ASource: TReSIDEvent);
 	end;
 
 
-procedure RegisterRenderer(const ARenderer: TReSIDAudioRendererClass);
+procedure RegisterRenderer(const ARenderer: TXSIDAudioRendererClass);
 	begin
 	DoCheckGlobalRenderers;
 	FGlobalRenderers.AddItem(ARenderer);
 	end;
 
-{ TReSIDAudioRenderers }
+{ TXSIDAudioRenderers }
 
-function TReSIDAudioRenderers.GetCount: Integer;
+function TXSIDAudioRenderers.GetCount: Integer;
 	begin
 	Result:= FList.Count;
 	end;
 
-function TReSIDAudioRenderers.GetItem(
-		AIndex: Integer): TReSIDAudioRendererClass;
+function TXSIDAudioRenderers.GetItem(
+		AIndex: Integer): TXSIDAudioRendererClass;
 	begin
-	Result:= TReSIDAudioRendererClass(FList.Items[AIndex]);
+	Result:= TXSIDAudioRendererClass(FList.Items[AIndex]);
 	end;
 
-procedure TReSIDAudioRenderers.AddItem(const AItem: TReSIDAudioRendererClass);
+procedure TXSIDAudioRenderers.AddItem(const AItem: TXSIDAudioRendererClass);
 	begin
 //dengland Should also make sure that the names are unique and replace the
 //		existing entry when a duplicate name is entered.
@@ -621,10 +592,10 @@ procedure TReSIDAudioRenderers.AddItem(const AItem: TReSIDAudioRendererClass);
 		FList.Add(AItem);
 	end;
 
-function TReSIDAudioRenderers.GetDefaultRenderer: TReSIDAudioRendererClass;
+function TXSIDAudioRenderers.GetDefaultRenderer: TXSIDAudioRendererClass;
 	var
 	i: Integer;
-	r: TReSIDAudioRendererClass;
+	r: TXSIDAudioRendererClass;
 
 	begin
 //dengland Should cache this data in add
@@ -646,29 +617,29 @@ function TReSIDAudioRenderers.GetDefaultRenderer: TReSIDAudioRendererClass;
 		Result:= nil;
 	end;
 
-constructor TReSIDAudioRenderers.Create;
+constructor TXSIDAudioRenderers.Create;
 	begin
 	FList:= TList.Create;
 	end;
 
-destructor TReSIDAudioRenderers.Destroy;
+destructor TXSIDAudioRenderers.Destroy;
 	begin
 	FList.Free;
 
 	inherited Destroy;
 	end;
 
-function TReSIDAudioRenderers.IndexOf(
-		const AItem: TReSIDAudioRendererClass): Integer;
+function TXSIDAudioRenderers.IndexOf(
+		const AItem: TXSIDAudioRendererClass): Integer;
 	begin
 	Result:= FList.IndexOf(AItem);
 	end;
 
-function TReSIDAudioRenderers.ItemByName(
-		const AName: AnsiString): TReSIDAudioRendererClass;
+function TXSIDAudioRenderers.ItemByName(
+		const AName: AnsiString): TXSIDAudioRendererClass;
 	var
 	i: Integer;
-	r: TReSIDAudioRendererClass;
+	r: TXSIDAudioRendererClass;
 
 	begin
 	Result:= nil;
@@ -686,39 +657,44 @@ function TReSIDAudioRenderers.ItemByName(
 	end;
 
 
-{ TReSIDAudioRenderer }
+{ TXSIDAudioRenderer }
 
-class function TReSIDAudioRenderer.GetRequireAllData: Boolean;
+class function TXSIDAudioRenderer.GetIsRealTime: Boolean;
+	begin
+    Result:= True;
+	end;
+
+class function TXSIDAudioRenderer.GetRequireAllData: Boolean;
 	begin
 	Result:= False;
 	end;
 
-class function TReSIDAudioRenderer.GetWantPlatformDefault: Boolean;
+class function TXSIDAudioRenderer.GetWantPlatformDefault: Boolean;
 	begin
 	Result:= False;
 	end;
 
-constructor TReSIDAudioRenderer.Create(const ASampleRate: TReSIDSampleRate;
-		const AFrameRate: Cardinal; const ABufferSize: TReSIDBufferSize;
+constructor TXSIDAudioRenderer.Create(const ASampleRate: TXSIDSampleRate;
+		const AFrameRate: Cardinal; const ABufferSize: TXSIDBufferSize;
 		const AParams: TStrings; var ABuffer: PArrSmallInt);
 	begin
 	inherited Create;
 	end;
 
-class procedure TReSIDAudioRenderer.FillParameterNames(const AStrings: TStrings);
+class procedure TXSIDAudioRenderer.FillParameterNames(const AStrings: TStrings);
 	begin
 	AStrings.Clear;
 	end;
 
 
-{ TReSIDConfigFilter }
+{ TXSIDConfigFilter }
 
-procedure TReSIDConfigFilter.SetChanged(AValue: Boolean);
+procedure TXSIDConfigFilter.SetChanged(AValue: Boolean);
 	begin
 	FOwner.SetChanged(AValue);
 	end;
 
-procedure TReSIDConfigFilter.SetCustom(AValue: Boolean);
+procedure TXSIDConfigFilter.SetCustom(AValue: Boolean);
 	begin
 	Lock;
 	try
@@ -737,7 +713,7 @@ procedure TReSIDConfigFilter.SetCustom(AValue: Boolean);
 		end;
 	end;
 
-function TReSIDConfigFilter.GetCustom: Boolean;
+function TXSIDConfigFilter.GetCustom: Boolean;
 	begin
 	Lock;
 	try
@@ -748,23 +724,23 @@ function TReSIDConfigFilter.GetCustom: Boolean;
 		end;
 	end;
 
-procedure TReSIDConfigFilter.Lock;
+procedure TXSIDConfigFilter.Lock;
 	begin
 	FOwner.Lock;
 	end;
 
-procedure TReSIDConfigFilter.Unlock;
+procedure TXSIDConfigFilter.Unlock;
 	begin
 	FOwner.Unlock;
 	end;
 
-procedure TReSIDConfigFilter.DoSetSystemDefaults;
+procedure TXSIDConfigFilter.DoSetSystemDefaults;
 	begin
 	FCustom:= False;
 	DoSetTypeSettings;
 	end;
 
-procedure TReSIDConfigFilter.Assign(AFilter: TReSIDConfigFilter);
+procedure TXSIDConfigFilter.Assign(AFilter: TXSIDConfigFilter);
 	begin
 	FCustom:= AFilter.FCustom;
 
@@ -772,7 +748,7 @@ procedure TReSIDConfigFilter.Assign(AFilter: TReSIDConfigFilter);
 	DoAssign(AFilter);
 	end;
 
-constructor TReSIDConfigFilter.Create(AOwner: TReSIDConfig);
+constructor TXSIDConfigFilter.Create(AOwner: TXSIDConfig);
 	begin
 	inherited Create;
 
@@ -781,9 +757,9 @@ constructor TReSIDConfigFilter.Create(AOwner: TReSIDConfig);
 	end;
 
 
-{ TReSIDConfig }
+{ TXSIDConfig }
 
-function TReSIDConfig.GetStarted: Boolean;
+function TXSIDConfig.GetStarted: Boolean;
 	begin
 	FLock.Acquire;
 	try
@@ -794,7 +770,7 @@ function TReSIDConfig.GetStarted: Boolean;
 		end;
 	end;
 
-procedure TReSIDConfig.SetSampleRate(AValue: TReSIDSampleRate);
+procedure TXSIDConfig.SetSampleRate(AValue: TXSIDSampleRate);
 	begin
 	FLock.Acquire;
 	try
@@ -809,7 +785,7 @@ procedure TReSIDConfig.SetSampleRate(AValue: TReSIDSampleRate);
 		end;
 	end;
 
-function TReSIDConfig.GetSampleRate: TReSIDSampleRate;
+function TXSIDConfig.GetSampleRate: TXSIDSampleRate;
 	begin
 	FLock.Acquire;
 	try
@@ -820,7 +796,7 @@ function TReSIDConfig.GetSampleRate: TReSIDSampleRate;
 		end;
 	end;
 
-procedure TReSIDConfig.SetBufferSize(AValue: TReSIDBufferSize);
+procedure TXSIDConfig.SetBufferSize(AValue: TXSIDBufferSize);
 	begin
 	FLock.Acquire;
 	try
@@ -835,7 +811,7 @@ procedure TReSIDConfig.SetBufferSize(AValue: TReSIDBufferSize);
 		end;
 	end;
 
-function TReSIDConfig.GetBufferSize: TReSIDBufferSize;
+function TXSIDConfig.GetBufferSize: TXSIDBufferSize;
 	begin
 	FLock.Acquire;
 	try
@@ -846,7 +822,7 @@ function TReSIDConfig.GetBufferSize: TReSIDBufferSize;
 		end;
 	end;
 
-procedure TReSIDConfig.SetInterpolation(AValue: TReSIDInterpolation);
+procedure TXSIDConfig.SetInterpolation(AValue: TXSIDInterpolation);
 	begin
 	FLock.Acquire;
 	try
@@ -861,7 +837,7 @@ procedure TReSIDConfig.SetInterpolation(AValue: TReSIDInterpolation);
 		end;
 	end;
 
-function TReSIDConfig.GetInterpolation: TReSIDInterpolation;
+function TXSIDConfig.GetInterpolation: TXSIDInterpolation;
 	begin
 	FLock.Acquire;
 	try
@@ -872,7 +848,7 @@ function TReSIDConfig.GetInterpolation: TReSIDInterpolation;
 		end;
 	end;
 
-procedure TReSIDConfig.SetStarted(AValue: Boolean);
+procedure TXSIDConfig.SetStarted(AValue: Boolean);
 	begin
 	FLock.Acquire;
 	try
@@ -883,7 +859,7 @@ procedure TReSIDConfig.SetStarted(AValue: Boolean);
 		end;
 	end;
 
-procedure TReSIDConfig.SetChanged(AValue: Boolean);
+procedure TXSIDConfig.SetChanged(AValue: Boolean);
 	begin
 	FLock.Acquire;
 	try
@@ -894,7 +870,7 @@ procedure TReSIDConfig.SetChanged(AValue: Boolean);
 		end;
 	end;
 
-function TReSIDConfig.GetChanged: Boolean;
+function TXSIDConfig.GetChanged: Boolean;
 	begin
 	FLock.Acquire;
 	try
@@ -905,10 +881,10 @@ function TReSIDConfig.GetChanged: Boolean;
 		end;
 	end;
 
-procedure TReSIDConfig.LoadFromIniFile(const AIniFile: TIniFile);
+procedure TXSIDConfig.LoadFromIniFile(const AIniFile: TIniFile);
 	var
 	i: Integer;
-	f: TReSIDFloat;
+	f: TXSIDFloat;
 	b: Boolean;
 	s: string;
 
@@ -946,15 +922,15 @@ procedure TReSIDConfig.LoadFromIniFile(const AIniFile: TIniFile);
 		SetRenderer(AnsiString(s));
 
 		i:= AIniFile.ReadInteger('Audio', 'SampleRate', Ord(FSampleRate));
-		FSampleRate:= TReSIDSampleRate(i);
+		FSampleRate:= TXSIDSampleRate(i);
 
 		i:= AIniFile.ReadInteger('Audio', 'BufferSize', Ord(FBufferSize));
-		FBufferSize:= TReSIDBufferSize(i);
+		FBufferSize:= TXSIDBufferSize(i);
 
 		i:= AIniFile.ReadInteger('Audio', 'Interpolation', Ord(FInterpolation));
 		if  i = 0 then
 			i:= 2;
-		FInterpolation:= TReSIDInterpolation(i);
+		FInterpolation:= TXSIDInterpolation(i);
 
 		AIniFile.ReadSectionValues('Audio.Renderer.' + string(FRenderer),
 				FRenderParams);
@@ -964,7 +940,7 @@ procedure TReSIDConfig.LoadFromIniFile(const AIniFile: TIniFile);
 		end;
 	end;
 
-procedure TReSIDConfig.SaveToIniFile(const AIniFile: TIniFile);
+procedure TXSIDConfig.SaveToIniFile(const AIniFile: TIniFile);
 	var
 	i: Integer;
 
@@ -1004,7 +980,7 @@ procedure TReSIDConfig.SaveToIniFile(const AIniFile: TIniFile);
 		end;
 	end;
 
-procedure TReSIDConfig.SetModel(AValue: TC64SIDModel);
+procedure TXSIDConfig.SetModel(AValue: TC64SIDModel);
 	begin
 	FLock.Acquire;
 	try
@@ -1023,7 +999,7 @@ procedure TReSIDConfig.SetModel(AValue: TC64SIDModel);
 		end;
 	end;
 
-function TReSIDConfig.GetModel: TC64SIDModel;
+function TXSIDConfig.GetModel: TC64SIDModel;
 	begin
 	FLock.Acquire;
 	try
@@ -1034,7 +1010,7 @@ function TReSIDConfig.GetModel: TC64SIDModel;
 		end;
 	end;
 
-procedure TReSIDConfig.SetSystem(AValue: TC64SystemType);
+procedure TXSIDConfig.SetSystem(AValue: TC64SystemType);
 	begin
 	FLock.Acquire;
 	try
@@ -1049,7 +1025,7 @@ procedure TReSIDConfig.SetSystem(AValue: TC64SystemType);
 		end;
 	end;
 
-procedure TReSIDConfig.SetUpdateRate(AValue: TC64UpdateRate);
+procedure TXSIDConfig.SetUpdateRate(AValue: TC64UpdateRate);
 	begin
 	FLock.Acquire;
 	try
@@ -1064,7 +1040,7 @@ procedure TReSIDConfig.SetUpdateRate(AValue: TC64UpdateRate);
 		end;
 	end;
 
-function TReSIDConfig.GetSysCyclesPerUpdate: TC64Float;
+function TXSIDConfig.GetSysCyclesPerUpdate: TC64Float;
 	var
 	f: Integer;
 
@@ -1073,7 +1049,7 @@ function TReSIDConfig.GetSysCyclesPerUpdate: TC64Float;
 	Result:= ARR_VAL_SYSCYCPRFS[FSystem] / f;
 	end;
 
-function TReSIDConfig.GetSystem: TC64SystemType;
+function TXSIDConfig.GetSystem: TC64SystemType;
 	begin
 	FLock.Acquire;
 	try
@@ -1084,7 +1060,7 @@ function TReSIDConfig.GetSystem: TC64SystemType;
 		end;
 	end;
 
-function TReSIDConfig.GetUpdateRate: TC64UpdateRate;
+function TXSIDConfig.GetUpdateRate: TC64UpdateRate;
 	begin
 	FLock.Acquire;
 	try
@@ -1095,7 +1071,7 @@ function TReSIDConfig.GetUpdateRate: TC64UpdateRate;
 		end;
 	end;
 
-procedure TReSIDConfig.SetFilter6581(AValue: Double);
+procedure TXSIDConfig.SetFilter6581(AValue: Double);
 	begin
 	FLock.Acquire;
 	try
@@ -1110,7 +1086,7 @@ procedure TReSIDConfig.SetFilter6581(AValue: Double);
 		end;
 	end;
 
-procedure TReSIDConfig.SetFilter8580(AValue: Double);
+procedure TXSIDConfig.SetFilter8580(AValue: Double);
 	begin
 	FLock.Acquire;
 	try
@@ -1125,7 +1101,7 @@ procedure TReSIDConfig.SetFilter8580(AValue: Double);
 		end;
 	end;
 
-procedure TReSIDConfig.SetFilterEnable(AValue: Boolean);
+procedure TXSIDConfig.SetFilterEnable(AValue: Boolean);
 	begin
 	FLock.Acquire;
 	try
@@ -1140,7 +1116,7 @@ procedure TReSIDConfig.SetFilterEnable(AValue: Boolean);
 		end;
 	end;
 
-function TReSIDConfig.GetFilter6581: Double;
+function TXSIDConfig.GetFilter6581: Double;
 	begin
 	FLock.Acquire;
 	try
@@ -1151,7 +1127,7 @@ function TReSIDConfig.GetFilter6581: Double;
 		end;
 	end;
 
-function TReSIDConfig.GetFilter8580: Double;
+function TXSIDConfig.GetFilter8580: Double;
 	begin
 	FLock.Acquire;
 	try
@@ -1162,7 +1138,7 @@ function TReSIDConfig.GetFilter8580: Double;
 		end;
 	end;
 
-function TReSIDConfig.GetFilterEnable: Boolean;
+function TXSIDConfig.GetFilterEnable: Boolean;
 	begin
 	FLock.Acquire;
 	try
@@ -1173,7 +1149,7 @@ function TReSIDConfig.GetFilterEnable: Boolean;
 		end;
 	end;
 
-procedure TReSIDConfig.SetDigiBoostEnable(AValue: Boolean);
+procedure TXSIDConfig.SetDigiBoostEnable(AValue: Boolean);
 	begin
 	FLock.Acquire;
 	try
@@ -1188,7 +1164,7 @@ procedure TReSIDConfig.SetDigiBoostEnable(AValue: Boolean);
 		end;
 	end;
 
-function TReSIDConfig.GetDigiBoostEnable: Boolean;
+function TXSIDConfig.GetDigiBoostEnable: Boolean;
 	begin
 	FLock.Acquire;
 	try
@@ -1199,7 +1175,7 @@ function TReSIDConfig.GetDigiBoostEnable: Boolean;
 		end;
 	end;
 
-function TReSIDConfig.GetCyclesPerSec: Cardinal;
+function TXSIDConfig.GetCyclesPerSec: Cardinal;
 	begin
 	FLock.Acquire;
 	try
@@ -1210,7 +1186,7 @@ function TReSIDConfig.GetCyclesPerSec: Cardinal;
 		end;
 	end;
 
-function TReSIDConfig.GetRefreshPerSec: TReSIDFloat;
+function TXSIDConfig.GetRefreshPerSec: TXSIDFloat;
 	begin
 	FLock.Acquire;
 	try
@@ -1221,7 +1197,7 @@ function TReSIDConfig.GetRefreshPerSec: TReSIDFloat;
 		end;
 	end;
 
-function TReSIDConfig.GetFreqFactor: TReSIDFloat;
+function TXSIDConfig.GetFreqFactor: TXSIDFloat;
 	begin
 	FLock.Acquire;
 	try
@@ -1232,9 +1208,9 @@ function TReSIDConfig.GetFreqFactor: TReSIDFloat;
 		end;
 	end;
 
-procedure TReSIDConfig.SetRenderer(AValue: AnsiString);
+procedure TXSIDConfig.SetRenderer(AValue: AnsiString);
 	var
-	r: TReSIDAudioRendererClass;
+	r: TXSIDAudioRendererClass;
 
 	begin
 	FLock.Acquire;
@@ -1257,7 +1233,7 @@ procedure TReSIDConfig.SetRenderer(AValue: AnsiString);
 		end;
 	end;
 
-function TReSIDConfig.GetRenderer: AnsiString;
+function TXSIDConfig.GetRenderer: AnsiString;
 	begin
 	FLock.Acquire;
 	try
@@ -1268,7 +1244,7 @@ function TReSIDConfig.GetRenderer: AnsiString;
 		end;
 	end;
 
-constructor TReSIDConfig.Create(const AIniFile: TIniFile = nil);
+constructor TXSIDConfig.Create(const AIniFile: TIniFile = nil);
 	begin
 	FLock:= TCriticalSection.Create;
 
@@ -1293,7 +1269,7 @@ constructor TReSIDConfig.Create(const AIniFile: TIniFile = nil);
 		LoadFromIniFile(AIniFile);
 	end;
 
-destructor TReSIDConfig.Destroy;
+destructor TXSIDConfig.Destroy;
 	begin
 	FRenderParams.Free;
 
@@ -1302,17 +1278,17 @@ destructor TReSIDConfig.Destroy;
 	inherited Destroy;
 	end;
 
-procedure TReSIDConfig.Lock;
+procedure TXSIDConfig.Lock;
 	begin
 	FLock.Acquire;
 	end;
 
-procedure TReSIDConfig.Unlock;
+procedure TXSIDConfig.Unlock;
 	begin
 	FLock.Release;
 	end;
 
-procedure TReSIDConfig.Assign(AConfig: TReSIDConfig);
+procedure TXSIDConfig.Assign(AConfig: TXSIDConfig);
 	begin
 	FLock.Acquire;
 	try
@@ -1347,7 +1323,7 @@ procedure TReSIDConfig.Assign(AConfig: TReSIDConfig);
 		end;
 	end;
 
-procedure TReSIDConfig.SetRenderParams(const AStrings: TStrings);
+procedure TXSIDConfig.SetRenderParams(const AStrings: TStrings);
 	begin
 	FLock.Acquire;
 	try
@@ -1359,7 +1335,7 @@ procedure TReSIDConfig.SetRenderParams(const AStrings: TStrings);
 		end;
 	end;
 
-function TReSIDConfig.GetRenderParams: TStrings;
+function TXSIDConfig.GetRenderParams: TStrings;
 	begin
 	FLock.Acquire;
 	try
@@ -1372,9 +1348,9 @@ function TReSIDConfig.GetRenderParams: TStrings;
 		end;
 	end;
 
-{ TReSIDEventPool }
+{ TXSIDEventPool }
 
-function TReSIDEventPool.AllocateEvent: PReSIDEvent;
+function TXSIDEventPool.AllocateEvent: PXSIDEvent;
 	begin
 	FLock.Acquire;
 	try
@@ -1394,7 +1370,7 @@ function TReSIDEventPool.AllocateEvent: PReSIDEvent;
 		end;
 	end;
 
-procedure TReSIDEventPool.Clear;
+procedure TXSIDEventPool.Clear;
 	var
 	i: Integer;
 
@@ -1413,7 +1389,7 @@ procedure TReSIDEventPool.Clear;
 		end;
 	end;
 
-constructor TReSIDEventPool.Create;
+constructor TXSIDEventPool.Create;
 	begin
 	inherited Create;
 
@@ -1422,7 +1398,7 @@ constructor TReSIDEventPool.Create;
 	FAvailList:= TList.Create;
 	end;
 
-destructor TReSIDEventPool.Destroy;
+destructor TXSIDEventPool.Destroy;
 	begin
 	Clear;
 
@@ -1433,7 +1409,7 @@ destructor TReSIDEventPool.Destroy;
 	inherited;
 	end;
 
-procedure TReSIDEventPool.ReleaseEvent(AEvent: PReSIDEvent);
+procedure TXSIDEventPool.ReleaseEvent(AEvent: PXSIDEvent);
 	begin
 	FLock.Acquire;
 	try
@@ -1448,8 +1424,8 @@ procedure TReSIDEventPool.ReleaseEvent(AEvent: PReSIDEvent);
 
 initialization
 	DoCheckGlobalRenderers;
-//	FGlobalConfig:= TReSIDConfig.Create;
-	GlobalEventPool:= TReSIDEventPool.Create;
+//	FGlobalConfig:= TXSIDConfig.Create;
+	GlobalEventPool:= TXSIDEventPool.Create;
 
 finalization
 	if Assigned(FGlobalConfig) then

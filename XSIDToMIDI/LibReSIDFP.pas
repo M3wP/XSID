@@ -42,7 +42,7 @@ procedure ReSIDInput(reSID: Pointer; value: Integer); stdcall;
 		external 'LibReSIDFP.dll' name '_ReSIDInput@8';
 procedure ReSIDClockSilent(reSID: Pointer; cycles: Integer); stdcall;
 		external 'LibReSIDFP.dll' name '_ReSIDClockSilent@8';
- 
+
 
 implementation
 

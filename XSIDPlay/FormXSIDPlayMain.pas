@@ -76,8 +76,8 @@ procedure TXSIDPlayMainForm.Button1Click(Sender: TObject);
 	TrackBar1.OnMouseDown:= nil;
 
 	GlobalReSIDStop;
-
 	GlobalEvents:= TReSIDEventManager.Create;
+
 	DoLoadFile(OpenDialog1.FileName);
 
 	FPlayConfig.Assign(GlobalConfig);
@@ -239,7 +239,8 @@ procedure TXSIDPlayMainForm.TBMouseUp(Sender: TObject; Button: TMouseButton; Shi
 	var
 	space,
 	offset,
-	pos: Integer;
+	pos,
+	lastPos: Integer;
 	ctx: TReSIDContext;
 
 	begin
@@ -255,9 +256,14 @@ procedure TXSIDPlayMainForm.TBMouseUp(Sender: TObject; Button: TMouseButton; Shi
 	GlobalReSID.RunSignal.ResetEvent;
 	GlobalReSID.PausedSignal.WaitFor;
 
-	TrackBar1.Position:= GlobalEvents.Seek(pos, ctx);
+	lastPos:= GlobalEvents.Seek(pos, ctx);
 
 	GlobalReSID.RestoreContext(ctx);
+
+	if  lastPos < pos then
+		GlobalReSID.Zoom(pos - lastPos);
+
+	TrackBar1.Position:= pos;
 
 	GlobalReSID.RunSignal.SetEvent;
 	GlobalReSID.PausedSignal.ResetEvent;

@@ -1,0 +1,645 @@
+object XSIDToMIDIMainForm: TXSIDToMIDIMainForm
+  Left = 0
+  Top = 0
+  Caption = 'XSID To MIDI'
+  ClientHeight = 731
+  ClientWidth = 831
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  PixelsPerInch = 96
+  TextHeight = 13
+  object vstInstruments: TVirtualStringTree
+    AlignWithMargins = True
+    Left = 4
+    Top = 101
+    Width = 823
+    Height = 453
+    Margins.Left = 4
+    Margins.Top = 4
+    Margins.Right = 4
+    Margins.Bottom = 4
+    Align = alClient
+    Header.AutoSizeIndex = 0
+    Header.Font.Charset = DEFAULT_CHARSET
+    Header.Font.Color = clWindowText
+    Header.Font.Height = -11
+    Header.Font.Name = 'Tahoma'
+    Header.Font.Style = []
+    Header.Options = [hoColumnResize, hoVisible]
+    TabOrder = 0
+    TreeOptions.AutoOptions = [toAutoScrollOnExpand, toAutoTristateTracking, toAutoDeleteMovedNodes, toAutoChangeScale]
+    TreeOptions.MiscOptions = [toFullRepaintOnResize, toGridExtensions, toInitOnSave, toReportMode, toToggleOnDblClick, toWheelPanning]
+    TreeOptions.PaintOptions = [toShowHorzGridLines, toShowVertGridLines, toThemeAware, toUseBlendedImages]
+    TreeOptions.SelectionOptions = [toFullRowSelect]
+    OnGetText = vstInstrumentsGetText
+    Columns = <
+      item
+        Position = 0
+        Width = 60
+        WideText = 'Index'
+      end
+      item
+        Position = 1
+        Width = 60
+        WideText = 'Voice'
+      end
+      item
+        Position = 2
+        Width = 60
+        WideText = 'Attack'
+      end
+      item
+        Position = 3
+        Width = 60
+        WideText = 'Decay'
+      end
+      item
+        Position = 4
+        Width = 60
+        WideText = 'Release'
+      end
+      item
+        Position = 5
+        Width = 140
+        WideText = 'Waveforms'
+      end
+      item
+        Position = 6
+        Width = 125
+        WideText = 'Effects'
+      end
+      item
+        Position = 7
+        Width = 75
+        WideText = 'Note Count'
+      end
+      item
+        Position = 8
+        Width = 75
+        WideText = 'Used Notes'
+      end
+      item
+        Position = 9
+        Width = 75
+        WideText = 'Bend Range'
+      end>
+  end
+  object Panel1: TPanel
+    Left = 0
+    Top = 0
+    Width = 831
+    Height = 97
+    Align = alTop
+    BevelOuter = bvNone
+    TabOrder = 1
+    DesignSize = (
+      831
+      97)
+    object Label1: TLabel
+      Left = 4
+      Top = 11
+      Width = 46
+      Height = 13
+      Caption = 'XSID File:'
+    end
+    object Label5: TLabel
+      Left = 204
+      Top = 40
+      Width = 24
+      Height = 13
+      Caption = 'Title:'
+    end
+    object Label6: TLabel
+      Left = 204
+      Top = 59
+      Width = 30
+      Height = 13
+      Caption = 'Artist:'
+    end
+    object Label7: TLabel
+      Left = 256
+      Top = 40
+      Width = 3
+      Height = 13
+    end
+    object Label8: TLabel
+      Left = 256
+      Top = 59
+      Width = 3
+      Height = 13
+    end
+    object Label9: TLabel
+      Left = 464
+      Top = 40
+      Width = 33
+      Height = 13
+      Caption = 'Album:'
+    end
+    object Label10: TLabel
+      Left = 464
+      Top = 59
+      Width = 27
+      Height = 13
+      Caption = 'Date:'
+    end
+    object Label11: TLabel
+      Left = 464
+      Top = 76
+      Width = 70
+      Height = 13
+      Caption = 'Track Number:'
+    end
+    object Label12: TLabel
+      Left = 552
+      Top = 40
+      Width = 3
+      Height = 13
+    end
+    object Label13: TLabel
+      Left = 552
+      Top = 59
+      Width = 3
+      Height = 13
+    end
+    object Label14: TLabel
+      Left = 552
+      Top = 76
+      Width = 3
+      Height = 13
+    end
+    object ButtonedEdit1: TButtonedEdit
+      Left = 96
+      Top = 8
+      Width = 731
+      Height = 21
+      Anchors = [akLeft, akTop, akRight]
+      Color = clBtnFace
+      Images = ImageList1
+      ReadOnly = True
+      RightButton.ImageIndex = 0
+      RightButton.Visible = True
+      TabOrder = 0
+      OnRightButtonClick = ButtonedEdit1RightButtonClick
+    end
+    object Button7: TButton
+      Left = 96
+      Top = 35
+      Width = 75
+      Height = 25
+      Caption = 'Dump Wav'
+      TabOrder = 1
+      OnClick = Button7Click
+    end
+  end
+  object Panel2: TPanel
+    Left = 0
+    Top = 558
+    Width = 831
+    Height = 173
+    Align = alBottom
+    BevelOuter = bvNone
+    TabOrder = 2
+    DesignSize = (
+      831
+      173)
+    object Label2: TLabel
+      Left = 4
+      Top = 8
+      Width = 21
+      Height = 13
+      Caption = 'Log:'
+    end
+    object Label3: TLabel
+      Left = 4
+      Top = 39
+      Width = 26
+      Height = 13
+      Caption = 'Wav:'
+    end
+    object Label4: TLabel
+      Left = 177
+      Top = 114
+      Width = 70
+      Height = 13
+      Caption = 'Max. Threads:'
+    end
+    object Label15: TLabel
+      Left = 464
+      Top = 8
+      Width = 27
+      Height = 13
+      Caption = 'MIDI:'
+    end
+    object Label16: TLabel
+      Left = 464
+      Top = 37
+      Width = 24
+      Height = 13
+      Caption = 'BPM:'
+    end
+    object Label17: TLabel
+      Left = 464
+      Top = 64
+      Width = 40
+      Height = 13
+      Caption = 'Division:'
+    end
+    object Label18: TLabel
+      Left = 653
+      Top = 37
+      Width = 80
+      Height = 13
+      Caption = 'Time Numerator:'
+    end
+    object Label19: TLabel
+      Left = 653
+      Top = 64
+      Width = 90
+      Height = 13
+      Caption = 'Time Denominator:'
+    end
+    object Label20: TLabel
+      Left = 4
+      Top = 147
+      Width = 58
+      Height = 13
+      Caption = 'Project Dir.:'
+    end
+    object Label21: TLabel
+      Left = 4
+      Top = 114
+      Width = 79
+      Height = 13
+      Caption = 'Param. Latency:'
+    end
+    object Button2: TButton
+      Left = 177
+      Top = 3
+      Width = 75
+      Height = 25
+      Caption = 'Dump Ins'
+      TabOrder = 0
+      OnClick = Button2Click
+    end
+    object Button3: TButton
+      Left = 96
+      Top = 3
+      Width = 75
+      Height = 25
+      Caption = 'Dump Filt'
+      TabOrder = 1
+      OnClick = Button3Click
+    end
+    object Button4: TButton
+      Left = 96
+      Top = 34
+      Width = 75
+      Height = 25
+      Caption = 'Dump Filt'
+      TabOrder = 2
+      OnClick = Button4Click
+    end
+    object Button5: TButton
+      Left = 177
+      Top = 34
+      Width = 75
+      Height = 25
+      Caption = 'Dump Ins'
+      TabOrder = 3
+      OnClick = Button5Click
+    end
+    object Button6: TButton
+      Left = 258
+      Top = 34
+      Width = 75
+      Height = 25
+      Caption = 'Dump All'
+      TabOrder = 4
+      OnClick = Button6Click
+    end
+    object CheckBox1: TCheckBox
+      Left = 96
+      Top = 65
+      Width = 237
+      Height = 17
+      Caption = 'Dump Filt./Mixer With All'
+      Checked = True
+      State = cbChecked
+      TabOrder = 5
+    end
+    object CheckBox2: TCheckBox
+      Left = 96
+      Top = 88
+      Width = 237
+      Height = 17
+      Caption = 'Process Filt./Mixer With Instruments'
+      TabOrder = 6
+    end
+    object Edit1: TEdit
+      Left = 258
+      Top = 111
+      Width = 75
+      Height = 21
+      NumbersOnly = True
+      TabOrder = 7
+      Text = '0'
+    end
+    object Button1: TButton
+      Left = 552
+      Top = 88
+      Width = 75
+      Height = 25
+      Caption = 'Dump Ins'
+      TabOrder = 8
+      OnClick = Button1Click
+    end
+    object Edit2: TEdit
+      Left = 552
+      Top = 34
+      Width = 75
+      Height = 21
+      TabOrder = 9
+      Text = '120'
+    end
+    object Edit3: TEdit
+      Left = 552
+      Top = 61
+      Width = 75
+      Height = 21
+      TabOrder = 10
+      Text = '168'
+    end
+    object Edit4: TEdit
+      Left = 752
+      Top = 34
+      Width = 75
+      Height = 21
+      NumbersOnly = True
+      TabOrder = 11
+      Text = '4'
+    end
+    object ComboBox1: TComboBox
+      Left = 752
+      Top = 61
+      Width = 75
+      Height = 21
+      Style = csDropDownList
+      ItemIndex = 1
+      TabOrder = 12
+      Text = '4'
+      Items.Strings = (
+        '2'
+        '4'
+        '8'
+        '16')
+    end
+    object Button8: TButton
+      Left = 552
+      Top = 3
+      Width = 75
+      Height = 25
+      Caption = 'Mapping...'
+      TabOrder = 13
+      OnClick = Button8Click
+    end
+    object Button9: TButton
+      Left = 633
+      Top = 88
+      Width = 75
+      Height = 25
+      Caption = 'Dump All'
+      TabOrder = 14
+      OnClick = Button9Click
+    end
+    object Button10: TButton
+      Left = 633
+      Top = 3
+      Width = 75
+      Height = 25
+      Caption = 'Save...'
+      TabOrder = 15
+      OnClick = Button10Click
+    end
+    object Button11: TButton
+      Left = 714
+      Top = 3
+      Width = 75
+      Height = 25
+      Caption = 'Load...'
+      TabOrder = 16
+      OnClick = Button11Click
+    end
+    object ButtonedEdit2: TButtonedEdit
+      Left = 96
+      Top = 144
+      Width = 731
+      Height = 21
+      Anchors = [akLeft, akTop, akRight]
+      Color = clBtnFace
+      Images = ImageList1
+      ReadOnly = True
+      RightButton.ImageIndex = 0
+      RightButton.Visible = True
+      TabOrder = 17
+      OnRightButtonClick = ButtonedEdit2RightButtonClick
+    end
+    object SpinEdit1: TSpinEdit
+      Left = 96
+      Top = 111
+      Width = 61
+      Height = 22
+      MaxValue = 15
+      MinValue = 3
+      TabOrder = 18
+      Value = 9
+    end
+  end
+  object ImageList1: TImageList
+    Left = 672
+    Top = 36
+    Bitmap = {
+      494C0101010008002C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      0000000000003600000028000000400000001000000001002000000000000010
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000959595008C8C
+      8C009191910095959500999999009D9D9D00A2A2A200A7A7A700ABABAB00AFAF
+      AF00B2B2B200B5B5B500BCBCBC00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000000F2F3700287C92002571
+      8500246B7E00226374001F5D6E001C556400194D5A0016434F00143943000E2E
+      36000B252C00061214005D5D5D00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000000000000267C8E002BA5CB002BA2
+      C7002A9FC4002B9FC300299BBF002999BC002795B8002691B400248FAF002289
+      AA002186A600217B970039393900000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000B9B9B9002A8296002EADD2002EA7
+      CD002EA4CA002EA3C8002DA0C4002C9DC2002A9BBF002897B9002693B500248F
+      AF00228AAC002485A30037373700000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000B6B6B6002C889D0031B2D90031AC
+      D40031ADD20031A9D00031A7CD0030A5CA002DA0C4002B9CC0002896B9002693
+      B400248EB1002587A50032323200000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000AEAEAE002F90A70034BBE10036B5
+      DE0037B4DB0036B2D90034AFD50032ABD20032A8CD002EA0C5002C9CC0002997
+      BB002592B4002588A8002E2E2E00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000AAAAAA003398B0003AC3EA0039BC
+      E4003ABBE4003ABAE10039B8DF0038B4DA0034ADD30031A7CD002EA1C5002A9B
+      BE002795B800268CAA002D2D2D00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000A5A5A50037A0BC003DCAF3003EC4
+      EE003FC3ED003DC1EA003DBEE6003ABAE10037B3D90034ACD2002FA6CA002D9F
+      C3002898BB00278DAD002A2A2A00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000009D9D9D0039AAC60042D6FC0041CC
+      F50041C9F30040C6F10040C4ED003DBEE60039B7DF0035AFD70031A8CE002DA2
+      C4002A9BC0002790B10026262600000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000999999003EB5CF0045E9FF0044D2
+      FD0045D0FB0044CCF50041C6F0003EC1EA003AB9E00036B2D80031AAD2002EA4
+      CA002B9DC2002791B30022222200000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000009393930040BDD50049DAFD0049EF
+      FF0045D3FF0045CFFB0041C9F3003EC3EB003BBBE30036B4DB0032ACD2002EA4
+      CB002B9EC4002891B40029292900000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000008C8C8C0042C7DB004ADFFF0048DB
+      FD0047E7FD0045DFFD0043DAFB003ED3F2003ACAEA0035C1E10033BBD9002FB4
+      D2002CAECC002693AC004E4E4E00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000008888880046D0E2004DE3FF004ADF
+      FF0048D9FD0046D4FF0040CBF9003EC5EF003ABCE70036B6DF0031AED7002FA8
+      CF002BA1C8002266790099999900000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000008888880041B6C0004AE7FA0046D5
+      EF000F292800213A3B002041430021484C00204E520023555B0021596000225D
+      660022646E000C292D0000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000000000000767676006A6A6A006868
+      6800000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000BEBEBE00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000424D3E000000000000003E000000
+      2800000040000000100000000100010000000000800000000000000000000000
+      000000000000000000000000FFFFFF00FFFF000000000000C001000000000000
+      8001000000000000800100000000000000010000000000000001000000000000
+      0001000000000000000100000000000000010000000000000001000000000000
+      0001000000000000000100000000000000010000000000000001000000000000
+      00030000000000008FFD00000000000000000000000000000000000000000000
+      000000000000}
+  end
+  object OpenDialog1: TOpenDialog
+    DefaultExt = 'xsid'
+    Filter = 'XSID Files (*.xsid)|*.xsid'
+    Options = [ofReadOnly, ofPathMustExist, ofFileMustExist, ofEnableSizing]
+    Title = 'Open XSID File...'
+    Left = 624
+    Top = 36
+  end
+  object SaveDialog1: TSaveDialog
+    DefaultExt = 'xs2m'
+    Filter = 'XSID To MIDI Projects (*.xs2m)|*.xs2m'
+    Options = [ofOverwritePrompt, ofPathMustExist, ofEnableSizing]
+    Title = 'Save XSID To MIDI Project...'
+    Left = 624
+    Top = 84
+  end
+  object OpenDialog2: TOpenDialog
+    DefaultExt = 'xs2m'
+    Filter = 'XSID To MIDI Projects (*.xs2m)|*.xs2m'
+    Options = [ofPathMustExist, ofFileMustExist, ofEnableSizing]
+    Title = 'Load XSID To MIDI Project...'
+    Left = 676
+    Top = 84
+  end
+  object FileOpenDialog1: TFileOpenDialog
+    FavoriteLinks = <>
+    FileTypes = <>
+    Options = [fdoPickFolders, fdoForceFileSystem, fdoPathMustExist, fdoDontAddToRecent]
+    Title = 'Select Project Folder...'
+    Left = 684
+    Top = 208
+  end
+  object Taskbar1: TTaskbar
+    TaskBarButtons = <>
+    TabProperties = []
+    Left = 748
+    Top = 40
+  end
+end
