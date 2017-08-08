@@ -15,4 +15,5 @@ extern "C" {
 	LIBRESIDFP_API void __stdcall ReSIDWrite(void* reSID, int offset, unsigned char value);
 	LIBRESIDFP_API void __stdcall ReSIDSetSamplingParameters(void* reSID, double clockFrequency, reSIDfp::SamplingMethod method, double samplingFrequency, double highestAccurateFrequency);
 	LIBRESIDFP_API void __stdcall ReSIDSetChipModel(void* reSID, reSIDfp::ChipModel model);
+	LIBRESIDFP_API void __stdcall ReSIDClockSilent(void* reSID, int cycles);
 }

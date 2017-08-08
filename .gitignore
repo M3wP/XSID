@@ -115,3 +115,5 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+LibReSIDFPDLL/src/FilterModelConfig.cpp.bak
+*.bak

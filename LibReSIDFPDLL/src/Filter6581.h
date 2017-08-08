@@ -350,8 +350,8 @@ private:
     /// Filter external input.
     int ve;
 
-    const int voiceScaleS14;
-    const int voiceDC;
+    int voiceScaleS14;
+    int voiceDC;
 
     /// VCR + associated capacitor connected to highpass output.
     std::auto_ptr<Integrator> hpIntegrator;
@@ -359,25 +359,38 @@ private:
     /// VCR + associated capacitor connected to lowpass output.
     std::auto_ptr<Integrator> bpIntegrator;
 
+	FilterModelConfig* fmcInstance;
+
 public:
+	
     Filter6581() :
+		fmcInstance(new FilterModelConfig()),
         currentGain(0),
         currentMixer(0),
         currentSummer(0),
         currentResonance(0),
-        f0_dac(FilterModelConfig::getInstance()->getDAC(0.5)),
-        mixer(FilterModelConfig::getInstance()->getMixer()),
-        summer(FilterModelConfig::getInstance()->getSummer()),
-        gain(FilterModelConfig::getInstance()->getGain()),
+//		f0_dac(fmcInstance->getDAC(0.5)),
+//		mixer(fmcInstance->getMixer()),
+//		summer(fmcInstance->getSummer()),
+//		gain(fmcInstance->getGain()),
         Vhp(0),
         Vbp(0),
         Vlp(0),
-        ve(0),
-        voiceScaleS14(FilterModelConfig::getInstance()->getVoiceScaleS14()),
-        voiceDC(FilterModelConfig::getInstance()->getVoiceDC()),
-        hpIntegrator(FilterModelConfig::getInstance()->buildIntegrator()),
-        bpIntegrator(FilterModelConfig::getInstance()->buildIntegrator())
+        ve(0)
+//		voiceScaleS14(fmcInstance->getVoiceScaleS14()),
+//		voiceDC(fmcInstance->getVoiceDC()),
+//		hpIntegrator(fmcInstance->buildIntegrator()),
+//		bpIntegrator(fmcInstance->buildIntegrator())
     {
+		f0_dac = fmcInstance->getDAC(0.5);
+		mixer = fmcInstance->getMixer();
+		summer = fmcInstance->getSummer();
+		gain = fmcInstance->getGain();
+		voiceScaleS14 = fmcInstance->getVoiceScaleS14();
+		voiceDC = fmcInstance->getVoiceDC();
+		hpIntegrator = fmcInstance->buildIntegrator();
+		bpIntegrator = fmcInstance->buildIntegrator();
+
         input(0);
     }
 

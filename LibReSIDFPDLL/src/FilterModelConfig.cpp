@@ -75,17 +75,17 @@ const Spline::Point FilterModelConfig::opamp_voltage[OPAMP_SIZE] =
   { 10.31,  0.81 },  // Approximate end of actual range
 };
 
-std::auto_ptr<FilterModelConfig> FilterModelConfig::instance(0);
+//std::auto_ptr<FilterModelConfig> FilterModelConfig::instance(0);
 
-FilterModelConfig* FilterModelConfig::getInstance()
-{
-    if (!instance.get())
-    {
-        instance.reset(new FilterModelConfig());
-    }
-
-    return instance.get();
-}
+//FilterModelConfig* FilterModelConfig::getInstance()
+//{
+//    if (!instance.get())
+//    {
+//        instance.reset(new FilterModelConfig());
+//    }
+//
+//   return instance.get();
+//}
 
 FilterModelConfig::FilterModelConfig() :
     voice_voltage_range(1.5),

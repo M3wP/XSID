@@ -65,4 +65,10 @@ extern "C" {
 		reSIDfp::SID *sid = reinterpret_cast<reSIDfp::SID*>(reSID);
 		sid->input(value);
 	}
+
+	LIBRESIDFP_API void __stdcall ReSIDClockSilent(void* reSID, int cycles)
+	{
+		reSIDfp::SID *sid = reinterpret_cast<reSIDfp::SID*>(reSID);
+		sid->clockSilent(cycles);
+	}
 }

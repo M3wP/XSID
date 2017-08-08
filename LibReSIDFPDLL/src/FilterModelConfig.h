@@ -42,9 +42,9 @@ private:
     static const unsigned int DAC_BITS = 11;
 
 private:
-    static std::auto_ptr<FilterModelConfig> instance;
+//  static std::auto_ptr<FilterModelConfig> instance;
     // This allows access to the private constructor
-    friend class std::auto_ptr<FilterModelConfig>;
+//    friend class std::auto_ptr<FilterModelConfig>;
 
     static const Spline::Point opamp_voltage[OPAMP_SIZE];
 
@@ -101,11 +101,11 @@ private:
 private:
     double getDacZero(double adjustment) const { return dac_zero - (adjustment - 0.5) * 2.; }
 
+public:
     FilterModelConfig();
     ~FilterModelConfig();
 
-public:
-    static FilterModelConfig* getInstance();
+//	static FilterModelConfig* getInstance();
 
     /**
      * The digital range of one voice is 20 bits; create a scaling term

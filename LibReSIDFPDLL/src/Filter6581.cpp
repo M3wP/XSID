@@ -30,6 +30,7 @@ namespace reSIDfp
 Filter6581::~Filter6581()
 {
     delete [] f0_dac;
+	delete fmcInstance;
 }
 
 void Filter6581::updatedCenterFrequency()
@@ -84,7 +85,7 @@ void Filter6581::updatedMixing()
 void Filter6581::setFilterCurve(double curvePosition)
 {
     delete [] f0_dac;
-    f0_dac = FilterModelConfig::getInstance()->getDAC(curvePosition);
+    f0_dac = fmcInstance->getDAC(curvePosition);
     updatedCenterFrequency();
 }
 
