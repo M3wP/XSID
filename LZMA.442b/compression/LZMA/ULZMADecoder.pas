@@ -4,6 +4,8 @@ unit ULZMADecoder;
 {$MODE Delphi}
 {$ENDIF}
 
+{$R-}
+
 interface
 
 uses ULZMABase,UBitTreeDecoder,ULZOutWindow,URangeDecoder,Math,Classes,ULZMACommon;
