@@ -3,7 +3,7 @@ object XSIDToMIDIMainForm: TXSIDToMIDIMainForm
   Top = 0
   Caption = 'XSID To MIDI'
   ClientHeight = 731
-  ClientWidth = 831
+  ClientWidth = 950
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -19,7 +19,7 @@ object XSIDToMIDIMainForm: TXSIDToMIDIMainForm
     AlignWithMargins = True
     Left = 4
     Top = 101
-    Width = 823
+    Width = 942
     Height = 453
     Margins.Left = 4
     Margins.Top = 4
@@ -38,6 +38,7 @@ object XSIDToMIDIMainForm: TXSIDToMIDIMainForm
     TreeOptions.MiscOptions = [toFullRepaintOnResize, toGridExtensions, toInitOnSave, toReportMode, toToggleOnDblClick, toWheelPanning]
     TreeOptions.PaintOptions = [toShowHorzGridLines, toShowVertGridLines, toThemeAware, toUseBlendedImages]
     TreeOptions.SelectionOptions = [toFullRowSelect]
+    OnDblClick = vstInstrumentsDblClick
     OnGetText = vstInstrumentsGetText
     Columns = <
       item
@@ -47,46 +48,51 @@ object XSIDToMIDIMainForm: TXSIDToMIDIMainForm
       end
       item
         Position = 1
-        Width = 60
-        WideText = 'Voice'
+        Width = 125
+        WideText = 'Name'
       end
       item
         Position = 2
         Width = 60
-        WideText = 'Attack'
+        WideText = 'Voice'
       end
       item
         Position = 3
         Width = 60
-        WideText = 'Decay'
+        WideText = 'Attack'
       end
       item
         Position = 4
         Width = 60
-        WideText = 'Release'
+        WideText = 'Decay'
       end
       item
         Position = 5
+        Width = 60
+        WideText = 'Release'
+      end
+      item
+        Position = 6
         Width = 140
         WideText = 'Waveforms'
       end
       item
-        Position = 6
+        Position = 7
         Width = 125
         WideText = 'Effects'
       end
       item
-        Position = 7
+        Position = 8
         Width = 75
         WideText = 'Note Count'
       end
       item
-        Position = 8
+        Position = 9
         Width = 75
         WideText = 'Used Notes'
       end
       item
-        Position = 9
+        Position = 10
         Width = 75
         WideText = 'Bend Range'
       end>
@@ -94,13 +100,14 @@ object XSIDToMIDIMainForm: TXSIDToMIDIMainForm
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 831
+    Width = 950
     Height = 97
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitWidth = 831
     DesignSize = (
-      831
+      950
       97)
     object Label1: TLabel
       Left = 4
@@ -177,7 +184,7 @@ object XSIDToMIDIMainForm: TXSIDToMIDIMainForm
     object ButtonedEdit1: TButtonedEdit
       Left = 96
       Top = 8
-      Width = 731
+      Width = 850
       Height = 21
       Anchors = [akLeft, akTop, akRight]
       Color = clBtnFace
@@ -187,6 +194,7 @@ object XSIDToMIDIMainForm: TXSIDToMIDIMainForm
       RightButton.Visible = True
       TabOrder = 0
       OnRightButtonClick = ButtonedEdit1RightButtonClick
+      ExplicitWidth = 731
     end
     object Button7: TButton
       Left = 96
@@ -201,13 +209,14 @@ object XSIDToMIDIMainForm: TXSIDToMIDIMainForm
   object Panel2: TPanel
     Left = 0
     Top = 558
-    Width = 831
+    Width = 950
     Height = 173
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 2
+    ExplicitWidth = 831
     DesignSize = (
-      831
+      950
       173)
     object Label2: TLabel
       Left = 4
@@ -439,7 +448,7 @@ object XSIDToMIDIMainForm: TXSIDToMIDIMainForm
     object ButtonedEdit2: TButtonedEdit
       Left = 96
       Top = 144
-      Width = 731
+      Width = 850
       Height = 21
       Anchors = [akLeft, akTop, akRight]
       Color = clBtnFace
@@ -449,6 +458,7 @@ object XSIDToMIDIMainForm: TXSIDToMIDIMainForm
       RightButton.Visible = True
       TabOrder = 17
       OnRightButtonClick = ButtonedEdit2RightButtonClick
+      ExplicitWidth = 731
     end
     object SpinEdit1: TSpinEdit
       Left = 96

@@ -169,15 +169,20 @@ type
 	TMIDIEvChannel = 0..15;
 	TMIDIEvDataLen = (melUnknown, melSingle, melDouble, melTriple, melVaries);
 
-    TMIDINoteMap = array[0..127] of TMIDINote;
+	TMIDINoteMap = array[0..127] of TMIDINote;
+	TMIDIPWidthStyle = (mpwNone, mpwSingle, mpwDouble);
 
 	PMIDIInsMapping = ^TMIDIInsMapping;
 	TMIDIInsMapping = record
+        Name: AnsiString;
+		Suppress: Boolean;
 		DrumMode: Boolean;
 		Channel: TMIDIEvChannel;
 		ExtendForBend: Boolean;
 		NoteMap: TMIDINoteMap;
 		ChordMode: Boolean;
+		PWidthStyle: TMIDIPWidthStyle;
+        EffectOutput: Boolean;
 	end;
 
 	TMIDIInsMap = array of TMIDIInsMapping;
@@ -375,6 +380,7 @@ procedure WriteNCard(AStream: TStream; AValue: Cardinal);
 procedure WriteNWord(AStream: TStream; AValue: Cardinal);
 
 procedure InitialiseSMFFile(var ASMFFile: TSMFFile);
+procedure FinaliseSMFFile(var ASMFFile: TSMFFile);
 procedure WriteSMFFile(const ASMFFile: TSMFFile; const AStream: TStream);
 
 
@@ -500,6 +506,43 @@ procedure InitialiseSMFFile(var ASMFFile: TSMFFile);
 	ASMFFile.TrackChunks^.Last:= nil;
 	ASMFFile.TrackChunks^.Next:= nil;
 	ASMFFile.TrackChunks^.Prev:= nil;
+	end;
+
+procedure FinaliseSMFFile(var ASMFFile: TSMFFile);
+	var
+	t,
+	n: PSMFMTrk;
+
+	procedure DisposeTrack(var ATrack: PSMFMTrk);
+		var
+		t,
+		n: PSMFMTev;
+
+		begin
+		t:= ATrack^.First;
+		while Assigned(t) do
+			begin
+			n:= t^.Next;
+			Dispose(t);
+			t:= n;
+			end;
+
+		Dispose(ATrack);
+		end;
+
+	begin
+	Dispose(ASMFFile.HeaderChunk);
+	ASMFFile.HeaderChunk:= nil;
+
+	t:= ASMFFile.TrackChunks;
+	while Assigned(t) do
+		begin
+		n:= t^.Next;
+		DisposeTrack(t);
+		t:= n;
+		end;
+
+	ASMFFile.TrackChunks:= nil;
 	end;
 
 procedure WriteSMFFile(const ASMFFile: TSMFFile; const AStream: TStream);

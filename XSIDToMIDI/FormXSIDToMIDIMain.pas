@@ -84,6 +84,7 @@ type
 		procedure Button10Click(Sender: TObject);
 		procedure Button11Click(Sender: TObject);
 		procedure ButtonedEdit2RightButtonClick(Sender: TObject);
+		procedure vstInstrumentsDblClick(Sender: TObject);
 
 	private type
 		TDumpIndex = 0..128;
@@ -135,6 +136,7 @@ type
 		procedure DoInitDump(const AFiltIns: Boolean; const AMaxThreads: Integer);
 		procedure DoStartDump;
 		procedure DoPrepareSMF(var ASMF: TSMFFile);
+		procedure DoFreeSMF(var ASMF: TSMFFile);
 		procedure DoAddNewMIDIEvent(const AOffset: UInt64;
 				const AFamily: TMIDIEvFamily; const AChannel: TMIDIEvChannel;
 				const AData: array of Byte; var AEvent: PSMFMTev;
@@ -204,12 +206,18 @@ procedure TXSIDToMIDIMainForm.Button10Click(Sender: TObject);
 			for i:= 0 to High(FMIDIMapping) do
 				begin
 				s:= 'Mapping' + IntToStr(i);
+				f.WriteString(s, 'Name', string(FMIDIMapping[i].Name));
+				f.WriteBool(s, 'Suppress', FMIDIMapping[i].Suppress);
 				f.WriteBool(s, 'DrumMode', FMIDIMapping[i].DrumMode);
 				f.WriteInteger(s, 'Channel', FMIDIMapping[i].Channel);
 				f.WriteBool(s, 'ExtendForBend', FMIDIMapping[i].ExtendForBend);
-				for j:= 0 to 127 do
-					f.WriteInteger(s, 'NoteMap' + IntToStr(j),
-							FMIDIMapping[i].NoteMap[j]);
+				f.WriteInteger(s, 'PWidthStyle', Ord(FMIDIMapping[i].PWidthStyle));
+				f.WriteBool(s, 'EffectOutput', FMIDIMapping[i].EffectOutput);
+
+				if  FMIDIMapping[i].DrumMode then
+					for j:= 0 to 127 do
+						f.WriteInteger(s, 'NoteMap' + IntToStr(j),
+								FMIDIMapping[i].NoteMap[j]);
 				end;
 
 			finally
@@ -224,7 +232,8 @@ procedure TXSIDToMIDIMainForm.Button11Click(Sender: TObject);
 	f: TIniFile;
 	c,
 	i,
-	j: Integer;
+	j,
+	k: Integer;
 	s: string;
 
 	begin
@@ -251,7 +260,7 @@ procedure TXSIDToMIDIMainForm.Button11Click(Sender: TObject);
 			c:= f.ReadInteger('Project', 'Count', 0);
 			if  c <> Length(FInstruments) then
 				begin
-				MessageDlg('Instrument analysis mismatch in saved project!', mtError,
+				MessageDlg('Instrument analysis mismatch in Project File!', mtError,
 						[mbOK], -1);
 				Exit;
 				end;
@@ -259,14 +268,34 @@ procedure TXSIDToMIDIMainForm.Button11Click(Sender: TObject);
 			for i:= 0 to c - 1 do
 				begin
 				s:= 'Mapping' + IntToStr(i);
+
+				FMIDIMapping[i].Name:= AnsiString(f.ReadString(s, 'Name', ''));
+				FMIDIMapping[i].Suppress:= f.ReadBool(s, 'Suppress', False);
 				FMIDIMapping[i].DrumMode:= f.ReadBool(s, 'DrumMode', False);
 				FMIDIMapping[i].Channel:= f.ReadInteger(s, 'Channel',
 						FMIDIMapping[i].Channel);
 				FMIDIMapping[i].ExtendForBend:= f.ReadBool(s, 'ExtendForBend', True);
-				for j:= 0 to 127 do
-					FMIDIMapping[i].NoteMap[j]:=
-							f.ReadInteger(s, 'NoteMap' + IntToStr(j),
-							FMIDIMapping[i].NoteMap[j]);
+				FMIDIMapping[i].PWidthStyle:=
+						TMIDIPWidthStyle(f.ReadInteger(s, 'PWidthStyle', 1));
+				FMIDIMapping[i].EffectOutput:= f.ReadBool(s, 'EffectOutput', True);
+
+				if  FMIDIMapping[i].DrumMode then
+					for j:= 0 to 127 do
+						begin
+						k:= f.ReadInteger(s, 'NoteMap' + IntToStr(j),
+								FMIDIMapping[i].NoteMap[j]);
+
+						if  FInstruments[i].UsedNotes[j]
+						and (k = -1) then
+							begin
+//							raise Exception.Create('Invalid Note Map reference in Project File!');
+							MessageDlg('Invalid Note Map reference in Project File!',
+									mtError, [mbOK], -1);
+							Exit;
+							end;
+
+						FMIDIMapping[i].NoteMap[j]:= k;
+						end;
 				end;
 
 			finally
@@ -285,6 +314,9 @@ procedure TXSIDToMIDIMainForm.Button1Click(Sender: TObject);
 	f: TFileStream;
 
 	begin
+	smf.HeaderChunk:= nil;
+	smf.TrackChunks:= nil;
+
 	ins:= -1;
 	node:= vstInstruments.GetFirst(False);
 	for i:= 0 to Length(FInstruments) - 1 do
@@ -338,7 +370,7 @@ procedure TXSIDToMIDIMainForm.Button1Click(Sender: TObject);
 		Taskbar1.ProgressValue:= 1;
 
 		f:= TFileStream.Create(Format('%sins%2.2d.mid', [
-				IncludeTrailingPathDelimiter(ButtonedEdit2.Text), ins]), fmCreate);
+				IncludeTrailingPathDelimiter(ButtonedEdit2.Text), ins + 1]), fmCreate);
 		try
 			WriteSMFFile(smf, f);
 
@@ -352,6 +384,8 @@ procedure TXSIDToMIDIMainForm.Button1Click(Sender: TObject);
 
 		Taskbar1.ProgressState:= TTaskBarProgressState.None;
 		Taskbar1.ProgressValue:= 0;
+
+        DoFreeSMF(smf);
 		end;
 	end;
 
@@ -382,7 +416,8 @@ procedure TXSIDToMIDIMainForm.Button2Click(Sender: TObject);
 			Exit;
 
 		DoDumpInsEvents(ins, events);
-		DoDumpFile(events, IncludeTrailingPathDelimiter(ButtonedEdit2.Text) + 'ins.log');
+		DoDumpFile(events, IncludeTrailingPathDelimiter(ButtonedEdit2.Text) +
+				Format('ins%2.2d.log', [ins + 1]));
 
 		finally
 		for i:= events.Count - 1 downto 0 do
@@ -503,6 +538,8 @@ procedure TXSIDToMIDIMainForm.Button8Click(Sender: TObject);
 	try
 		MIDIMappingForm.EditMapping(@FMIDIMapping[ins], FInstruments[ins], ins);
 
+		vstInstruments.Invalidate;
+
 		finally
 		MIDIMappingForm.Release;
 		MIDIMappingForm:= nil;
@@ -517,8 +554,13 @@ procedure TXSIDToMIDIMainForm.Button9Click(Sender: TObject);
 	f: TFileStream;
 
 	begin
+	smf.HeaderChunk:= nil;
+	smf.TrackChunks:= nil;
+
 	DumpProgressForm:= TDumpProgressForm.Create(Self);
 	try
+		FDumpAbort:= False;
+
 		DumpProgressForm.SetSubProgressCount(0);
 
 		DumpProgressForm.ProgressBar1.Min:= 0;
@@ -535,21 +577,27 @@ procedure TXSIDToMIDIMainForm.Button9Click(Sender: TObject);
 		DoPrepareSMF(smf);
 
 		trk:= smf.TrackChunks;
-		for I:= 0 to High(FInstruments) do
+		for i:= 0 to High(FInstruments) do
 			begin
-			New(trk^.Next);
-			Inc(smf.HeaderChunk^.NumTrks);
+			if  not FMIDIMapping[i].Suppress then
+				begin
+				New(trk^.Next);
+				Inc(smf.HeaderChunk^.NumTrks);
 
-			trk^.Next^.Prev:= trk;
-			trk^.Next^.Next:= nil;
-			trk:= trk^.Next;
+				trk^.Next^.Prev:= trk;
+				trk^.Next^.Next:= nil;
+				trk:= trk^.Next;
 
-			trk^.ID:= LIT_TOK_SMFTRACK;
-			trk^.Len:= 0;
-			trk^.First:= nil;
-			trk^.Last:= nil;
+				trk^.ID:= LIT_TOK_SMFTRACK;
+				trk^.Len:= 0;
+				trk^.First:= nil;
+				trk^.Last:= nil;
 
-			DoDumpMIDIIns(smf, trk, i);
+				DoDumpMIDIIns(smf, trk, i);
+				end;
+
+			if  FDumpAbort then
+				Exit;
 
 			DumpProgressForm.ProgressBar1.Position:= i + 1;
 			Taskbar1.ProgressMaxValue:= i + 1;
@@ -570,6 +618,8 @@ procedure TXSIDToMIDIMainForm.Button9Click(Sender: TObject);
 		DumpProgressForm:= nil;
 		Taskbar1.ProgressState:= TTaskBarProgressState.None;
 		Taskbar1.ProgressValue:= 0;
+
+        DoFreeSMF(smf);
 		end;
 	end;
 
@@ -1533,9 +1583,79 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 		nc:= 0;
 		end;
 
+	procedure AddPWidthChange;
+		var
+		pwsw: TMIDIDataLong;
+		pwsl,
+		pwsh: Byte;
+
+		begin
+		if  FMIDIMapping[AIns].PWidthStyle = mpwDouble then
+			begin
+			pwsw:= Round(FSongRecompose[AIns, i].PWidthMap[j].Width /
+					High(TSIDPulseWidth) * High(TMIDIDataLong));
+			pwsl:= pwsw and $7F;
+			pwsh:= (pwsw and $3F80) shr 7;
+
+			SetLength(d, 2);
+			d[0]:= 17;
+			d[1]:= pwsl;
+			DoAddNewMIDIEvent(eo, mefController, ch, d, ev, ATrack);
+			eo:= 0;
+			end
+		else
+			pwsh:= Round(FSongRecompose[AIns, i].PWidthMap[j].Width /
+					High(TSIDPulseWidth) * 127);
+
+		if  FMIDIMapping[AIns].PWidthStyle > mpwNone then
+			begin
+			SetLength(d, 2);
+			d[0]:= 16;
+			d[1]:= pwsh;
+			DoAddNewMIDIEvent(eo, mefController, ch, d, ev, ATrack);
+			end;
+		end;
+
+	procedure AddEffectChange;
+		var
+//		mrm,
+		mos: Byte;
+
+		begin
+		if  setRing in FInstruments[AIns].EffectMap[k].Effect then
+			mos:= 64
+		else
+			mos:= 0;
+
+		if  setSync in FInstruments[AIns].EffectMap[k].Effect then
+			mos:= mos + 32;
+//		else
+//			mos:= 0;
+
+		SetLength(d, 2);
+		d[0]:= 18;
+		d[1]:= mos;
+		DoAddNewMIDIEvent(eo, mefController, ch, d, ev, ATrack);
+		eo:= 0;
+
+//		d[0]:= 18;
+//		d[1]:= mrm;
+//		DoAddNewMIDIEvent(eo, mefController, ch, d, ev, ATrack);
+//		eo:= 0;
+		end;
+
 	begin
 	ev:= nil;
 	FMIDIResidual:= 0;
+
+	if  Length(FMIDIMapping[AIns].Name) > 0 then
+		begin
+		SetLength(d, Length(FMIDIMapping[AIns].Name) + 2);
+		d[0]:= 03;
+		d[1]:= Length(FMIDIMapping[AIns].Name);
+		Move(AnsiString(FMIDIMapping[AIns].Name)[1], d[2], Length(FMIDIMapping[AIns].Name));
+		DoAddNewMIDIEvent(0, mefSystem, 15, d, ev, ATrack);
+		end;
 
 	if  FMIDIMapping[AIns].DrumMode then
 		ch:= 9
@@ -1554,7 +1674,6 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 		begin
 		p:= 0;
 		j:= 0;
-		k:= 1;
 
 		for nc:= 0 to High(nn) do
 			nn[nc]:= -1;
@@ -1564,6 +1683,17 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 
 		lo:= FSongRecompose[AIns, i].NoteStart - co;
 		CalculateEventOffset(lo);
+
+		if  not FMIDIMapping[AIns].DrumMode
+		and FMIDIMapping[AIns].EffectOutput
+		and ((FInstruments[AIns].EffectMap[0].Effect <> [])
+		or   (Length(FInstruments[AIns].EffectMap) > 1)) then
+			begin
+			k:= 0;
+			AddEffectChange;
+			eo:= 0;
+			end;
+		k:= 1;
 
 		if  not FMIDIMapping[AIns].DrumMode
 		and not FMIDIMapping[AIns].ChordMode then
@@ -1623,20 +1753,26 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 							nm:= smtPitch;
 							end;
 					smtPWidth:
-						if  (j < Length(FSongRecompose[AIns, i].PWidthMap))
+						if  not FMIDIMapping[AIns].DrumMode
+						and (FMIDIMapping[AIns].PWidthStyle > mpwNone)
+						and (j < Length(FSongRecompose[AIns, i].PWidthMap))
 						and (FSongRecompose[AIns, i].PWidthMap[j].Offset < no -
 								FSongRecompose[AIns, i].NoteStart) then
 							begin
-//							no:= FSongRecompose[AIns, i].PWidthMap[j].Offset;
-//							nm:= smtPWidth;
+							no:= FSongRecompose[AIns, i].PWidthMap[j].Offset +
+									FSongRecompose[AIns, i].NoteStart;
+							nm:= smtPWidth;
 							end;
 					smtEffect:
-						if  (k < Length(FInstruments[AIns].EffectMap))
+						if  not FMIDIMapping[AIns].DrumMode
+						and FMIDIMapping[AIns].EffectOutput
+						and (k < Length(FInstruments[AIns].EffectMap))
 						and (FInstruments[AIns].EffectMap[k].Offset <= no -
 								FSongRecompose[AIns, i].NoteStart) then
 							begin
-//							no:= FSongRecompose[AIns, i].EffectMap[k].Offset;
-//							nm:= smtEffect;
+							no:= FInstruments[AIns].EffectMap[k].Offset +
+									FSongRecompose[AIns, i].NoteStart;
+							nm:= smtEffect;
 							end;
 					end;
 
@@ -1669,15 +1805,15 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 					end;
 				smtPWidth:
 					begin
-//					if  eo >= 28 then
-//						begin
-//						s:= True;
-//						Dec(eo, 14);
-//						end
-//					else
-//						s:= False;
-//
-//					AddPWidthChange;
+					CalculateEventOffset(lo);
+					AddPWidthChange;
+					Inc(j);
+					end;
+				smtEffect:
+					begin
+					CalculateEventOffset(lo);
+					AddEffectChange;
+					Inc(k);
 					end;
 				end;
 
@@ -1693,6 +1829,11 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 	d[0]:= $2F;
 	d[1]:= $00;
 	DoAddNewMIDIEvent(eo, mefSystem, $0F, d, ev, ATrack);
+	end;
+
+procedure TXSIDToMIDIMainForm.DoFreeSMF(var ASMF: TSMFFile);
+	begin
+    FinaliseSMFFile(ASMF);
 	end;
 
 procedure TXSIDToMIDIMainForm.DoInitDump(const AFiltIns: Boolean;
@@ -1827,9 +1968,13 @@ procedure TXSIDToMIDIMainForm.DoPrepareMIDIMapping;
 		FMIDIMapping[i].Channel:= i mod 16;
 		FMIDIMapping[i].ExtendForBend:= True;
 		FMIDIMapping[i].ChordMode:= False;
+		FMIDIMapping[i].PWidthStyle:= mpwSingle;
+		FMIDIMapping[i].EffectOutput:= True;
 
 		if  FMIDIMapping[i].Channel = 9 then
 			FMIDIMapping[i].Channel:= 0;
+
+		FMIDIMapping[1].Name:= AnsiString(Format('%2.2d', [i + 1]));
 
 		for j:= 0 to High(FMIDIMapping[i].NoteMap) do
 			if  FInstruments[i].UsedNotes[j] then
@@ -1936,7 +2081,7 @@ procedure TXSIDToMIDIMainForm.DoStartDump;
 			else
 				begin
 				FDumpData[ASlt].XSIDConfig.GetRenderParams.Add('File Name=' + p + 'ins' +
-						Format('%2.2d', [FDumpData[ASlt].ID]) + '.wav');
+						Format('%2.2d', [FDumpData[ASlt].ID + 1]) + '.wav');
 				DumpProgressForm.SubProgressText[ASlt].Caption:= 'Ins. ' +
 						IntToStr(FDumpData[ASlt].ID) + ':';
 				end;
@@ -2134,6 +2279,7 @@ procedure TXSIDToMIDIMainForm.FindOrInsertInstrument(
 		if  AB > m then
 			m:= AB;
 
+//todo  Make this amount (+-30% configurable)
 		l:= Round(m - m * 0.30);
 		h:= Round(m + m * 0.30);
 
@@ -2374,6 +2520,11 @@ procedure TXSIDToMIDIMainForm.LoadCallback(const AStage: TXSIDFileStage;
 	Application.ProcessMessages;
 	end;
 
+procedure TXSIDToMIDIMainForm.vstInstrumentsDblClick(Sender: TObject);
+	begin
+    Button8Click(Sender);
+	end;
+
 procedure TXSIDToMIDIMainForm.vstInstrumentsGetText(Sender: TBaseVirtualTree;
 		Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
 		var CellText: string);
@@ -2417,16 +2568,18 @@ procedure TXSIDToMIDIMainForm.vstInstrumentsGetText(Sender: TBaseVirtualTree;
 	begin
 	case Column of
 		0:
-			CellText:= IntToStr(Node^.Index);
+			CellText:= IntToStr(Node^.Index + 1);
 		1:
-			CellText:= IntToStr(FInstruments[Node^.Index].Voice + 1);
+            CellText:= string(FMIDIMapping[Node^.Index].Name);
 		2:
-			CellText:= IntToStr(FInstruments[Node^.Index].Attack);
+			CellText:= IntToStr(FInstruments[Node^.Index].Voice + 1);
 		3:
-			CellText:= IntToStr(FInstruments[Node^.Index].Decay);
+			CellText:= IntToStr(FInstruments[Node^.Index].Attack);
 		4:
-			CellText:= IntToStr(FInstruments[Node^.Index].Release);
+			CellText:= IntToStr(FInstruments[Node^.Index].Decay);
 		5:
+			CellText:= IntToStr(FInstruments[Node^.Index].Release);
+		6:
 			begin
 			s:= WaveformsToString(FInstruments[Node^.Index].WaveformMap[0].Waveform);
 			i:= 1;
@@ -2440,7 +2593,7 @@ procedure TXSIDToMIDIMainForm.vstInstrumentsGetText(Sender: TBaseVirtualTree;
 
 			CellText:= s;
 			end;
-		6:
+		7:
 			begin
 			s:= EffectsToString(FInstruments[Node^.Index].EffectMap[0].Effect);
 			i:= 1;
@@ -2454,11 +2607,11 @@ procedure TXSIDToMIDIMainForm.vstInstrumentsGetText(Sender: TBaseVirtualTree;
 
 			CellText:= s;
 			end;
-		7:
-			CellText:= IntToStr(FInstruments[Node^.Index].HitCount);
 		8:
-			CellText:= IntToStr(FInstruments[Node^.Index].NotesCount);
+			CellText:= IntToStr(FInstruments[Node^.Index].HitCount);
 		9:
+			CellText:= IntToStr(FInstruments[Node^.Index].NotesCount);
+		10:
 			CellText:= Format('%d.%2.2d', [FInstruments[Node^.Index].BendRangeNotes,
 					FInstruments[Node^.Index].BendRangeCents]);
 		else

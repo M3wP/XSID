@@ -23,6 +23,12 @@ type
 		Button2: TButton;
     CheckBox1: TCheckBox;
     CheckBox2: TCheckBox;
+    ComboBox4: TComboBox;
+    CheckBox3: TCheckBox;
+    Label6: TLabel;
+    CheckBox4: TCheckBox;
+    Edit1: TEdit;
+    Label7: TLabel;
 		procedure ComboBox2Change(Sender: TObject);
     procedure ComboBox3Change(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -78,20 +84,25 @@ procedure TMIDIMappingForm.DoPopulateControls;
 	begin
 	FChanging:= True;
 	try
-		if  FMapping.DrumMode then
+		Edit1.Text:= string(FMapping^.Name);
+
+		CheckBox4.Checked:= FMapping^.Suppress;
+
+		if FMapping^.DrumMode then
 			RadioButton2.Checked:= True
 		else
 			RadioButton1.Checked:= True;
 
-		i:= FMapping.Channel;
+		i:= FMapping^.Channel;
 		if  i > 8 then
 			Dec(i);
 
 		ComboBox1.ItemIndex:= i;
 
-		CheckBox1.Checked:= FMapping.ExtendForBend;
-
-		CheckBox2.Checked:= FMapping.ChordMode;
+		CheckBox1.Checked:= FMapping^.ExtendForBend;
+		CheckBox2.Checked:= FMapping^.ChordMode;
+		ComboBox4.ItemIndex:= Ord(FMapping^.PWidthStyle);
+		CheckBox3.Checked:= FMapping^.EffectOutput;
 
 		SetLength(FSourceNotes, FInstrument.NotesCount);
 		j:= 0;
@@ -104,7 +115,7 @@ procedure TMIDIMappingForm.DoPopulateControls;
 
 		SetLength(FDestNotes, 128);
 		for i:= 0 to 127 do
-			FDestNotes[i]:= FMapping.NoteMap[i];
+			FDestNotes[i]:= FMapping^.NoteMap[i];
 
 		ComboBox2.Items.Clear;
 		for i:= 0 to High(FSourceNotes) do
@@ -115,7 +126,7 @@ procedure TMIDIMappingForm.DoPopulateControls;
 			ComboBox3.Items.Add(ARR_LBL_STDDRMNTN[i]);
 
 		ComboBox2.ItemIndex:= 0;
-		ComboBox3.ItemIndex:= FMapping.NoteMap[FSourceNotes[0]];
+		ComboBox3.ItemIndex:= FMapping^.NoteMap[FSourceNotes[0]];
 
 		finally
 		FChanging:= False;
@@ -127,7 +138,7 @@ procedure TMIDIMappingForm.EditMapping(const AMapping: PMIDIInsMapping;
 	begin
 	FMapping:= AMapping;
 	FInstrument:= AInstrument;
-	Label2.Caption:= IntToStr(AIndex);
+	Label2.Caption:= IntToStr(AIndex + 1);
 
 	DoPopulateControls;
 	ShowModal;
@@ -140,18 +151,24 @@ procedure TMIDIMappingForm.FormClose(Sender: TObject; var Action: TCloseAction);
 	begin
 	if  ModalResult = mrOk then
 		begin
-		FMapping.DrumMode:= RadioButton2.Checked;
+		FMapping^.Name:= AnsiString(Edit1.Text);
+
+		FMapping^.Suppress:= CheckBox4.Checked;
+
+		FMapping^.DrumMode:= RadioButton2.Checked;
 		i:= ComboBox1.ItemIndex;
 		if  i > 8 then
 			Inc(i);
-		FMapping.Channel:= i;
+		FMapping^.Channel:= i;
 
-		FMapping.ExtendForBend:= CheckBox1.Checked;
+		FMapping^.ExtendForBend:= CheckBox1.Checked;
 
-		FMapping.ChordMode:= CheckBox2.Checked;
+		FMapping^.ChordMode:= CheckBox2.Checked;
+		FMapping^.PWidthStyle:= TMIDIPWidthStyle(ComboBox4.ItemIndex);
+		FMapping^.EffectOutput:= CheckBox3.Checked;
 
 		for i:= 0 to High(FSourceNotes) do
-			FMapping.NoteMap[FSourceNotes[i]]:= FDestNotes[FSourceNotes[i]];
+			FMapping^.NoteMap[FSourceNotes[i]]:= FDestNotes[FSourceNotes[i]];
 		end;
 	end;
 
