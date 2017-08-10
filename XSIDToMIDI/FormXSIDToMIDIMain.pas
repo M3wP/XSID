@@ -2478,6 +2478,9 @@ procedure TXSIDToMIDIMainForm.FindOrInsertInstrument(
 				if  bmax > 2400 then
 					bmax:= 2400;
 
+				if  bmax < 200 then
+                    bmax:= 200;
+
 				FInstruments[i].BendRange:= bmax;
 				end;
 			end;
