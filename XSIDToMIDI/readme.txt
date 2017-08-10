@@ -82,6 +82,22 @@ bass lines and drum beats where extreme bends are used to "dither" multiple
 instruments but also for handling lead lines where multiple notes have been 
 layed down together and quickly toggled.
 
+You can elect to output Pulse Width change data to one or two controllers.  When
+single controller is selected, data is output only on controller 16.  For the 
+double controller selection, data is output on controller 16 (coarse) and 17 
+(fine).
+
+You can also elect to output Effect information.  Controller 18 is used.  Value
+0 means no effects, 32 for just Oscillator Sync., 64 for just Ring Modulation
+and 96 for both.
+
+As a note, when using Chord Mode, controller 19 is used to indicate where a 
+pitch bend would have occurred.
+
+You can name an instrument and that name will be output as the track name in the
+MIDI file.  If you elect to "suppress" an instrument, it will not be output with
+a dump all to MIDI.
+
 Once you have determined the mapping, you can perform the conversion on
 individual instruments or the whole song.  Each instrument will be output to its
 own track in the MIDI file.
@@ -119,10 +135,6 @@ There is a forth-coming tool, XSID List, which can help you view XSID files.
 Effects such as Ring Modulation and Osciallator Synchronisation are detected 
 and used in the instrument/patch determinations but are not used in the 
 reproductions (since these require multiple voices).
-
-Presently, the effect and pulse width information is not output in the MIDI 
-files.  This will be changed very soon.  Information will be output on the MIDI 
-controllers 75-79.
 
 
 Compiling
