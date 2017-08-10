@@ -154,7 +154,7 @@ type
 
 		BendRangeNotes: TMIDINote;
 		BendRangeCents: TMIDICents;
-        BendRange: Integer;
+		BendRange: Integer;
 
 		procedure Initialise;
 	end;
@@ -182,7 +182,8 @@ type
 		NoteMap: TMIDINoteMap;
 		ChordMode: Boolean;
 		PWidthStyle: TMIDIPWidthStyle;
-        EffectOutput: Boolean;
+		EffectOutput: Boolean;
+        BendRange: Integer;
 	end;
 
 	TMIDIInsMap = array of TMIDIInsMapping;

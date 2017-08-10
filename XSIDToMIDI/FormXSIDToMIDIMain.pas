@@ -209,6 +209,7 @@ procedure TXSIDToMIDIMainForm.Button10Click(Sender: TObject);
 				f.WriteString(s, 'Name', string(FMIDIMapping[i].Name));
 				f.WriteBool(s, 'Suppress', FMIDIMapping[i].Suppress);
 				f.WriteBool(s, 'DrumMode', FMIDIMapping[i].DrumMode);
+				f.WriteInteger(s, 'BendRange', FMIDIMapping[i].BendRange);
 				f.WriteInteger(s, 'Channel', FMIDIMapping[i].Channel);
 				f.WriteBool(s, 'ExtendForBend', FMIDIMapping[i].ExtendForBend);
 				f.WriteInteger(s, 'PWidthStyle', Ord(FMIDIMapping[i].PWidthStyle));
@@ -274,6 +275,8 @@ procedure TXSIDToMIDIMainForm.Button11Click(Sender: TObject);
 				FMIDIMapping[i].DrumMode:= f.ReadBool(s, 'DrumMode', False);
 				FMIDIMapping[i].Channel:= f.ReadInteger(s, 'Channel',
 						FMIDIMapping[i].Channel);
+				FMIDIMapping[i].BendRange:= f.ReadInteger(s, 'BendRange',
+						FInstruments[i].BendRange);
 				FMIDIMapping[i].ExtendForBend:= f.ReadBool(s, 'ExtendForBend', True);
 				FMIDIMapping[i].PWidthStyle:=
 						TMIDIPWidthStyle(f.ReadInteger(s, 'PWidthStyle', 1));
@@ -1426,11 +1429,13 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 	lo,
 	co,
 	no: UInt64;
-	ro: Extended;
+	ro,
+	rp: Extended;
 	i,
 	p,
 	j,
 	k: Integer;
+	lg,
 	g: Boolean;
 	d: array of Byte;
 	im,
@@ -1456,7 +1461,7 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 		mn: Byte;
 
 		begin
-		mn:= FInstruments[AIns].BendRange div 100;
+		mn:= FMIDIMapping[AIns].BendRange div 100;
 
 		SetLength(d, 2);
 		d[0]:= $65;
@@ -1480,9 +1485,12 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 		bb: TMIDIPitchBend;
 		br: Integer;
 		bc: TMIDIDataLong;
+		be,
+		ba: Extended;
+
 
 		begin
-		br:= FInstruments[AIns].BendRange;
+		br:= FMIDIMapping[AIns].BendRange;
 
 		if  Abs(ATotalCents) > br then
 			if  ATotalCents < 0 then
@@ -1493,9 +1501,22 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 			tc:= ATotalCents;
 
 		if  tc < 0 then
-			bb:= Round(tc / br * 8192)
+			begin
+			be:= tc / br * 8192 + rp;
+			bb:= Trunc(be);
+			ba:= be - bb;
+			if  (ba <= -0.5)
+			and (bb > -8192) then
+				Dec(bb);
+
+			rp:= be - bb;
+			end
 		else
-			bb:= Round(tc / br * 8191);
+			begin
+			be:= tc / br * 8191 + rp;
+			bb:= Round(be);
+			rp:= be - bb;
+			end;
 
 		bc:= bb + 8192;
 
@@ -1516,12 +1537,19 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 			begin
 			newc:= ANewNote * 100 + ANewCents;
 
-			if  Abs(AInitCents - newc) > FInstruments[AIns].BendRange then
+			if  Abs(AInitCents - newc) > FMIDIMapping[AIns].BendRange then
 				begin
 				ic:= ANewNote * 100 + ANewCents;
 
-				AddMIDIPitchBend(ANewCents);
+				SetLength(d, 2);
+				d[0]:= 68;
+				d[1]:= 127;
+				DoAddNewMIDIEvent(eo, mefController, ch, d, ev, ATrack);
 				eo:= 0;
+				lg:= True;
+
+				AddMIDIPitchBend(ANewCents);
+
 				SetLength(d, 2);
 				d[0]:= ANewNote;
 				d[1]:= Round((FSongRecompose[AIns, i].Sustain + 1) / 16 * 64 + 63);
@@ -1571,6 +1599,16 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 		i: Integer;
 
 		begin
+		if lg then
+			begin
+			SetLength(d, 2);
+			d[0]:= 68;
+			d[1]:= 0;
+			DoAddNewMIDIEvent(eo, mefController, ch, d, ev, ATrack);
+			eo:= 0;
+			lg:= False;
+			end;
+
 		for i:= 0 to nc - 1 do
 			begin
 			SetLength(d, 2);
@@ -1672,6 +1710,7 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 	i:= 0;
 	while  i < Length(FSongRecompose[AIns]) do
 		begin
+		rp:= 0;
 		p:= 0;
 		j:= 0;
 
@@ -1973,6 +2012,8 @@ procedure TXSIDToMIDIMainForm.DoPrepareMIDIMapping;
 
 		if  FMIDIMapping[i].Channel = 9 then
 			FMIDIMapping[i].Channel:= 0;
+
+        FMIDIMapping[i].BendRange:= FInstruments[i].BendRange;
 
 		FMIDIMapping[i].Name:= AnsiString(Format('%2.2d', [FMIDIMapping[i].Channel + 1]));
 

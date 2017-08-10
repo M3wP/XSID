@@ -5,7 +5,7 @@ interface
 uses
 	Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
 	System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
-	XSIDToMIDITypes;
+	XSIDToMIDITypes, Vcl.Samples.Spin;
 
 type
 	TMIDIMappingForm = class(TForm)
@@ -29,9 +29,14 @@ type
     CheckBox4: TCheckBox;
     Edit1: TEdit;
     Label7: TLabel;
+    SpinEdit1: TSpinEdit;
+    Label8: TLabel;
+    Label9: TLabel;
+    Button3: TButton;
 		procedure ComboBox2Change(Sender: TObject);
     procedure ComboBox3Change(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure Button3Click(Sender: TObject);
 	private
 		FMapping: PMIDIInsMapping;
 		FInstrument: TSIDInstrument;
@@ -56,6 +61,11 @@ implementation
 {$R *.dfm}
 
 { TMIDIMappingForm }
+
+procedure TMIDIMappingForm.Button3Click(Sender: TObject);
+	begin
+	SpinEdit1.Value:= FInstrument.BendRange div 100;
+	end;
 
 procedure TMIDIMappingForm.ComboBox2Change(Sender: TObject);
 	begin
@@ -98,6 +108,8 @@ procedure TMIDIMappingForm.DoPopulateControls;
 			Dec(i);
 
 		ComboBox1.ItemIndex:= i;
+
+		SpinEdit1.Value:= FMapping^.BendRange div 100;
 
 		CheckBox1.Checked:= FMapping^.ExtendForBend;
 		CheckBox2.Checked:= FMapping^.ChordMode;
@@ -160,6 +172,8 @@ procedure TMIDIMappingForm.FormClose(Sender: TObject; var Action: TCloseAction);
 		if  i > 8 then
 			Inc(i);
 		FMapping^.Channel:= i;
+
+        FMapping^.BendRange:= SpinEdit1.Value * 100;
 
 		FMapping^.ExtendForBend:= CheckBox1.Checked;
 

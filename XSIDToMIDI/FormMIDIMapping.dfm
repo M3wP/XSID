@@ -2,7 +2,7 @@ object MIDIMappingForm: TMIDIMappingForm
   Left = 0
   Top = 0
   Caption = 'MIDI Mapping...'
-  ClientHeight = 382
+  ClientHeight = 425
   ClientWidth = 377
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -15,7 +15,7 @@ object MIDIMappingForm: TMIDIMappingForm
   OnClose = FormClose
   DesignSize = (
     377
-    382)
+    425)
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
@@ -41,21 +41,21 @@ object MIDIMappingForm: TMIDIMappingForm
   end
   object Label4: TLabel
     Left = 24
-    Top = 299
+    Top = 327
     Width = 37
     Height = 13
     Caption = 'Source:'
   end
   object Label5: TLabel
-    Left = 192
-    Top = 299
+    Left = 200
+    Top = 327
     Width = 30
     Height = 13
     Caption = 'Dest.:'
   end
   object Label6: TLabel
     Left = 24
-    Top = 208
+    Top = 236
     Width = 42
     Height = 13
     Caption = 'P.Width:'
@@ -66,6 +66,20 @@ object MIDIMappingForm: TMIDIMappingForm
     Width = 31
     Height = 13
     Caption = 'Name:'
+  end
+  object Label8: TLabel
+    Left = 24
+    Top = 162
+    Width = 65
+    Height = 13
+    Caption = 'Legato After:'
+  end
+  object Label9: TLabel
+    Left = 183
+    Top = 162
+    Width = 56
+    Height = 13
+    Caption = '(semitones)'
   end
   object RadioButton1: TRadioButton
     Left = 8
@@ -79,14 +93,14 @@ object MIDIMappingForm: TMIDIMappingForm
   end
   object RadioButton2: TRadioButton
     Left = 8
-    Top = 271
+    Top = 299
     Width = 113
     Height = 17
     Caption = 'Drum Mode'
     TabOrder = 1
   end
   object ComboBox1: TComboBox
-    Left = 90
+    Left = 102
     Top = 132
     Width = 75
     Height = 21
@@ -110,8 +124,8 @@ object MIDIMappingForm: TMIDIMappingForm
       '16')
   end
   object ComboBox2: TComboBox
-    Left = 90
-    Top = 296
+    Left = 102
+    Top = 324
     Width = 75
     Height = 21
     Style = csDropDownList
@@ -120,7 +134,7 @@ object MIDIMappingForm: TMIDIMappingForm
   end
   object ComboBox3: TComboBox
     Left = 248
-    Top = 296
+    Top = 324
     Width = 121
     Height = 21
     Style = csDropDownList
@@ -129,7 +143,7 @@ object MIDIMappingForm: TMIDIMappingForm
   end
   object Button1: TButton
     Left = 294
-    Top = 349
+    Top = 392
     Width = 75
     Height = 25
     Anchors = [akLeft, akBottom]
@@ -141,7 +155,7 @@ object MIDIMappingForm: TMIDIMappingForm
   end
   object Button2: TButton
     Left = 213
-    Top = 349
+    Top = 392
     Width = 75
     Height = 25
     Anchors = [akLeft, akBottom]
@@ -152,24 +166,24 @@ object MIDIMappingForm: TMIDIMappingForm
     ExplicitTop = 332
   end
   object CheckBox1: TCheckBox
-    Left = 90
-    Top = 159
-    Width = 279
+    Left = 102
+    Top = 187
+    Width = 267
     Height = 17
     Caption = 'Extend Note Duration for Bend'
     TabOrder = 7
   end
   object CheckBox2: TCheckBox
-    Left = 90
-    Top = 182
-    Width = 198
+    Left = 102
+    Top = 210
+    Width = 186
     Height = 17
     Caption = 'Chord Mode (no bends, no legato)'
     TabOrder = 8
   end
   object ComboBox4: TComboBox
-    Left = 90
-    Top = 205
+    Left = 102
+    Top = 233
     Width = 97
     Height = 21
     Style = csDropDownList
@@ -180,28 +194,47 @@ object MIDIMappingForm: TMIDIMappingForm
       'Double')
   end
   object CheckBox3: TCheckBox
-    Left = 90
-    Top = 232
-    Width = 279
+    Left = 102
+    Top = 260
+    Width = 267
     Height = 17
     Caption = 'Output Effect Reference'
     TabOrder = 10
   end
   object CheckBox4: TCheckBox
-    Left = 90
+    Left = 102
     Top = 67
-    Width = 179
+    Width = 167
     Height = 17
     Caption = 'Suppress Output in Dump All'
     TabOrder = 11
   end
   object Edit1: TEdit
-    Left = 90
+    Left = 102
     Top = 40
-    Width = 279
+    Width = 267
     Height = 21
     MaxLength = 127
     TabOrder = 12
     Text = 'Edit1'
+  end
+  object SpinEdit1: TSpinEdit
+    Left = 102
+    Top = 159
+    Width = 75
+    Height = 22
+    MaxValue = 24
+    MinValue = 1
+    TabOrder = 13
+    Value = 0
+  end
+  object Button3: TButton
+    Left = 245
+    Top = 156
+    Width = 75
+    Height = 25
+    Caption = 'Default'
+    TabOrder = 14
+    OnClick = Button3Click
   end
 end
