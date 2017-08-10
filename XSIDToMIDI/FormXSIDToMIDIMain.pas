@@ -1974,7 +1974,7 @@ procedure TXSIDToMIDIMainForm.DoPrepareMIDIMapping;
 		if  FMIDIMapping[i].Channel = 9 then
 			FMIDIMapping[i].Channel:= 0;
 
-		FMIDIMapping[1].Name:= AnsiString(Format('%2.2d', [i + 1]));
+		FMIDIMapping[i].Name:= AnsiString(Format('%2.2d', [FMIDIMapping[i].Channel + 1]));
 
 		for j:= 0 to High(FMIDIMapping[i].NoteMap) do
 			if  FInstruments[i].UsedNotes[j] then
@@ -2083,7 +2083,7 @@ procedure TXSIDToMIDIMainForm.DoStartDump;
 				FDumpData[ASlt].XSIDConfig.GetRenderParams.Add('File Name=' + p + 'ins' +
 						Format('%2.2d', [FDumpData[ASlt].ID + 1]) + '.wav');
 				DumpProgressForm.SubProgressText[ASlt].Caption:= 'Ins. ' +
-						IntToStr(FDumpData[ASlt].ID) + ':';
+						IntToStr(FDumpData[ASlt].ID + 1) + ':';
 				end;
 
 			DumpProgressForm.SubProgressBar[ASlt].Min:= 0;
