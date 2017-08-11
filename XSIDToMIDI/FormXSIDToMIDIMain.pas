@@ -143,6 +143,7 @@ type
 				const ATrack: PSMFMTrk);
 		procedure DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMFMTrk;
 				const AIns: Integer);
+		procedure DoStepDumpProgress;
 
 	protected
 		procedure FindOrInsertInstrument(const AInstrument: TSIDInstrument;
@@ -209,8 +210,9 @@ procedure TXSIDToMIDIMainForm.Button10Click(Sender: TObject);
 				f.WriteString(s, 'Name', string(FMIDIMapping[i].Name));
 				f.WriteBool(s, 'Suppress', FMIDIMapping[i].Suppress);
 				f.WriteBool(s, 'DrumMode', FMIDIMapping[i].DrumMode);
-				f.WriteInteger(s, 'BendRange', FMIDIMapping[i].BendRange);
 				f.WriteInteger(s, 'Channel', FMIDIMapping[i].Channel);
+				f.WriteInteger(s, 'BendRange', FMIDIMapping[i].BendRange);
+				f.WriteBool(s, 'LegatoExtra', FMIDIMapping[i].LegatoExtra);
 				f.WriteBool(s, 'ExtendForBend', FMIDIMapping[i].ExtendForBend);
 				f.WriteInteger(s, 'PWidthStyle', Ord(FMIDIMapping[i].PWidthStyle));
 				f.WriteBool(s, 'EffectOutput', FMIDIMapping[i].EffectOutput);
@@ -277,6 +279,7 @@ procedure TXSIDToMIDIMainForm.Button11Click(Sender: TObject);
 						FMIDIMapping[i].Channel);
 				FMIDIMapping[i].BendRange:= f.ReadInteger(s, 'BendRange',
 						FInstruments[i].BendRange);
+				FMIDIMapping[i].LegatoExtra:= f.ReadBool(s, 'LegatoExtra', True);
 				FMIDIMapping[i].ExtendForBend:= f.ReadBool(s, 'ExtendForBend', True);
 				FMIDIMapping[i].PWidthStyle:=
 						TMIDIPWidthStyle(f.ReadInteger(s, 'PWidthStyle', 1));
@@ -367,10 +370,13 @@ procedure TXSIDToMIDIMainForm.Button1Click(Sender: TObject);
 
 		DoDumpMIDIIns(smf, trk, ins);
 
-		DumpProgressForm.ProgressBar1.Position:= 1;
-		Application.ProcessMessages;
-
+//		DumpProgressForm.ProgressBar1.Position:= 1;
+		DoStepDumpProgress;
 		Taskbar1.ProgressValue:= 1;
+
+		DumpProgressForm.Label1.Caption:= 'Writing';
+		DumpProgressForm.Invalidate;
+		Application.ProcessMessages;
 
 		f:= TFileStream.Create(Format('%sins%2.2d.mid', [
 				IncludeTrailingPathDelimiter(ButtonedEdit2.Text), ins + 1]), fmCreate);
@@ -602,11 +608,16 @@ procedure TXSIDToMIDIMainForm.Button9Click(Sender: TObject);
 			if  FDumpAbort then
 				Exit;
 
-			DumpProgressForm.ProgressBar1.Position:= i + 1;
+			DoStepDumpProgress;
+//			DumpProgressForm.ProgressBar1.Position:= i + 1;
 			Taskbar1.ProgressMaxValue:= i + 1;
 
 			Application.ProcessMessages;
 			end;
+
+		DumpProgressForm.Label1.Caption:= 'Writing File';
+		DumpProgressForm.Invalidate;
+		Application.ProcessMessages;
 
 		f:= TFileStream.Create(IncludeTrailingPathDelimiter(ButtonedEdit2.Text) + 'song.mid', fmCreate);
 		try
@@ -1428,13 +1439,15 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 	eo,
 	lo,
 	co,
-	no: UInt64;
-	ro,
-	rp: Extended;
+	no,
+	ln: UInt64;
+	ro: Extended;
+//	rp: Extended;
 	i,
 	p,
 	j,
 	k: Integer;
+	lc,
 	lg,
 	g: Boolean;
 	d: array of Byte;
@@ -1442,7 +1455,8 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 	nm: TSIDMessageType;
 //	ln: TMIDINote;
 	ch: Byte;
-	ic: Integer;
+	ic,
+	el: Integer;
 	nn: TMIDINoteMap;
 	nc: Integer;
 
@@ -1488,7 +1502,6 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 		be,
 		ba: Extended;
 
-
 		begin
 		br:= FMIDIMapping[AIns].BendRange;
 
@@ -1502,20 +1515,19 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 
 		if  tc < 0 then
 			begin
-			be:= tc / br * 8192 + rp;
+			be:= tc / br * 8192;// + rp;
 			bb:= Trunc(be);
 			ba:= be - bb;
 			if  (ba <= -0.5)
 			and (bb > -8192) then
 				Dec(bb);
-
-			rp:= be - bb;
+//			rp:= be - bb;
 			end
 		else
 			begin
-			be:= tc / br * 8191 + rp;
+			be:= tc / br * 8191;// + rp;
 			bb:= Round(be);
-			rp:= be - bb;
+//			rp:= be - bb;
 			end;
 
 		bc:= bb + 8192;
@@ -1548,16 +1560,26 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 				eo:= 0;
 				lg:= True;
 
-				AddMIDIPitchBend(ANewCents);
+				if  not FMIDIMapping[AIns].LegatoExtra then
+					begin
+					d[0]:= nn[0];
+					d[1]:= 0;
+					DoAddNewMIDIEvent(eo, mefNoteOff, ch, d, ev, ATrack);
+					end
+				else
+					begin
+					nn[1]:= nn[0];
+					nc:= 2;
+					lc:= True;
+					ln:= no + el * 500;
+					end;
 
-				SetLength(d, 2);
+//				SetLength(d, 2);
 				d[0]:= ANewNote;
 				d[1]:= Round((FSongRecompose[AIns, i].Sustain + 1) / 16 * 64 + 63);
 				DoAddNewMIDIEvent(eo, mefNoteOn, ch, d, ev, ATrack);
 
-				d[0]:= nn[0];
-				d[1]:= 0;
-				DoAddNewMIDIEvent(eo, mefNoteOff, ch, d, ev, ATrack);
+				AddMIDIPitchBend(ANewCents);
 
 				nn[0]:= ANewNote;
 				end
@@ -1683,6 +1705,8 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 		end;
 
 	begin
+	el:= SpinEdit1.Value;
+
 	ev:= nil;
 	FMIDIResidual:= 0;
 
@@ -1702,6 +1726,14 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 		ch:= FMIDIMapping[AIns].Channel;
 
 		AddMIDIPitchBendRange;
+
+		if  FMIDIMapping[AIns].LegatoExtra then
+			begin
+			SetLength(d, 2);
+			d[0]:= 126;
+			d[1]:= ch + 1;
+			DoAddNewMIDIEvent(0, mefController, ch, d, ev, ATrack);
+			end;
 		end;
 
 	co:= 0;
@@ -1710,9 +1742,11 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 	i:= 0;
 	while  i < Length(FSongRecompose[AIns]) do
 		begin
-		rp:= 0;
+//		rp:= 0;
 		p:= 0;
 		j:= 0;
+		lc:= False;
+		ln:= High(Integer);
 
 		for nc:= 0 to High(nn) do
 			nn[nc]:= -1;
@@ -1813,6 +1847,13 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 									FSongRecompose[AIns, i].NoteStart;
 							nm:= smtEffect;
 							end;
+					smtLegato:
+						if  lc
+						and (ln < no) then
+							begin
+							no:= ln;
+							nm:= smtLegato;
+							end;
 					end;
 
 
@@ -1854,6 +1895,16 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 					AddEffectChange;
 					Inc(k);
 					end;
+				smtLegato:
+					begin
+					CalculateEventOffset(lo);
+					lc:= False;
+					SetLength(d, 2);
+					d[0]:= nn[1];
+					d[1]:= 0;
+					DoAddNewMIDIEvent(eo, mefNoteOff, ch, d, ev, ATrack);
+					nc:= 1;
+					end;
 				end;
 
 			co:= no;
@@ -1872,7 +1923,7 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 
 procedure TXSIDToMIDIMainForm.DoFreeSMF(var ASMF: TSMFFile);
 	begin
-    FinaliseSMFFile(ASMF);
+	FinaliseSMFFile(ASMF);
 	end;
 
 procedure TXSIDToMIDIMainForm.DoInitDump(const AFiltIns: Boolean;
@@ -2005,6 +2056,7 @@ procedure TXSIDToMIDIMainForm.DoPrepareMIDIMapping;
 		begin
 		FMIDIMapping[i].DrumMode:= False;
 		FMIDIMapping[i].Channel:= i mod 16;
+		FMIDIMapping[i].LegatoExtra:= True;
 		FMIDIMapping[i].ExtendForBend:= True;
 		FMIDIMapping[i].ChordMode:= False;
 		FMIDIMapping[i].PWidthStyle:= mpwSingle;
@@ -2163,6 +2215,13 @@ procedure TXSIDToMIDIMainForm.DoStartDump;
 					end;
 	end;
 
+procedure TXSIDToMIDIMainForm.DoStepDumpProgress;
+	begin
+	DumpProgressForm.ProgressBar1.StepBy(1);
+	DumpProgressForm.ProgressBar1.StepBy(-1);
+	DumpProgressForm.ProgressBar1.StepBy(1);
+	end;
+
 procedure TXSIDToMIDIMainForm.DumpCallback(const AID: Integer;
 		const AStats: TXSIDStats);
 	var
@@ -2197,8 +2256,9 @@ procedure TXSIDToMIDIMainForm.DumpCallback(const AID: Integer;
 			Dec(FDumpCount);
 			if  Assigned(DumpProgressForm) then
 				begin
-				DumpProgressForm.ProgressBar1.Position:=
-						DumpProgressForm.ProgressBar1.Position + 1;
+				DoStepDumpProgress;
+//				DumpProgressForm.ProgressBar1.Position:=
+//						DumpProgressForm.ProgressBar1.Position + 1;
 				DumpProgressForm.SubProgressBar[slt].Position:= 0;
 
 				Taskbar1.ProgressValue:= Taskbar1.ProgressValue + 1;
@@ -2550,10 +2610,17 @@ procedure TXSIDToMIDIMainForm.LoadCallback(const AStage: TXSIDFileStage;
 		FileLoadForm.ProgressBar1.Style:= pbstNormal;
 		FileLoadForm.ProgressBar1.Min:= 0;
 		FileLoadForm.ProgressBar1.Max:= ASize - 1;
+
+		FileLoadForm.ProgressBar1.Position:= APosition;
+		FileLoadForm.ProgressBar1.Position:= APosition - 1;
 		FileLoadForm.ProgressBar1.Position:= APosition;
 		end
 	else if  AStage = rfsLoad then
-		FileLoadForm.ProgressBar1.Position:= APosition
+		begin
+		FileLoadForm.ProgressBar1.Position:= APosition;
+		FileLoadForm.ProgressBar1.Position:= APosition - 1;
+		FileLoadForm.ProgressBar1.Position:= APosition;
+		end
 	else if  (AStage = rfsInitialise)
 	and (APosition > -1) then
 		begin

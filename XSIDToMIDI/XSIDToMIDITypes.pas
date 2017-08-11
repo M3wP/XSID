@@ -23,7 +23,7 @@ type
 	TSIDRegType = (srtFreqLo, srtFreqHi, srtPWLo, srtPWHi, srtControl, srtEnvAD,
 			srtEnvSR);
 	TSIDMessageType = (smtNext, smtGateOff, smtPitch, smtWaveform, smtPWidth,
-			smtEffect, smtFiltMix);
+			smtEffect, smtFiltMix, smtLegato);
 
 	TSIDVoiceState = record
 	private
@@ -183,7 +183,8 @@ type
 		ChordMode: Boolean;
 		PWidthStyle: TMIDIPWidthStyle;
 		EffectOutput: Boolean;
-        BendRange: Integer;
+		BendRange: Integer;
+        LegatoExtra: Boolean;
 	end;
 
 	TMIDIInsMap = array of TMIDIInsMapping;

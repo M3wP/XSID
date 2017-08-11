@@ -2,7 +2,7 @@ object MIDIMappingForm: TMIDIMappingForm
   Left = 0
   Top = 0
   Caption = 'MIDI Mapping...'
-  ClientHeight = 425
+  ClientHeight = 441
   ClientWidth = 377
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -15,7 +15,7 @@ object MIDIMappingForm: TMIDIMappingForm
   OnClose = FormClose
   DesignSize = (
     377
-    425)
+    441)
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
@@ -41,21 +41,21 @@ object MIDIMappingForm: TMIDIMappingForm
   end
   object Label4: TLabel
     Left = 24
-    Top = 327
+    Top = 350
     Width = 37
     Height = 13
     Caption = 'Source:'
   end
   object Label5: TLabel
     Left = 200
-    Top = 327
+    Top = 350
     Width = 30
     Height = 13
     Caption = 'Dest.:'
   end
   object Label6: TLabel
     Left = 24
-    Top = 236
+    Top = 259
     Width = 42
     Height = 13
     Caption = 'P.Width:'
@@ -93,7 +93,7 @@ object MIDIMappingForm: TMIDIMappingForm
   end
   object RadioButton2: TRadioButton
     Left = 8
-    Top = 299
+    Top = 322
     Width = 113
     Height = 17
     Caption = 'Drum Mode'
@@ -125,7 +125,7 @@ object MIDIMappingForm: TMIDIMappingForm
   end
   object ComboBox2: TComboBox
     Left = 102
-    Top = 324
+    Top = 347
     Width = 75
     Height = 21
     Style = csDropDownList
@@ -134,7 +134,7 @@ object MIDIMappingForm: TMIDIMappingForm
   end
   object ComboBox3: TComboBox
     Left = 248
-    Top = 324
+    Top = 347
     Width = 121
     Height = 21
     Style = csDropDownList
@@ -143,7 +143,7 @@ object MIDIMappingForm: TMIDIMappingForm
   end
   object Button1: TButton
     Left = 294
-    Top = 392
+    Top = 408
     Width = 75
     Height = 25
     Anchors = [akLeft, akBottom]
@@ -155,7 +155,7 @@ object MIDIMappingForm: TMIDIMappingForm
   end
   object Button2: TButton
     Left = 213
-    Top = 392
+    Top = 408
     Width = 75
     Height = 25
     Anchors = [akLeft, akBottom]
@@ -167,7 +167,7 @@ object MIDIMappingForm: TMIDIMappingForm
   end
   object CheckBox1: TCheckBox
     Left = 102
-    Top = 187
+    Top = 210
     Width = 267
     Height = 17
     Caption = 'Extend Note Duration for Bend'
@@ -175,7 +175,7 @@ object MIDIMappingForm: TMIDIMappingForm
   end
   object CheckBox2: TCheckBox
     Left = 102
-    Top = 210
+    Top = 233
     Width = 186
     Height = 17
     Caption = 'Chord Mode (no bends, no legato)'
@@ -183,7 +183,7 @@ object MIDIMappingForm: TMIDIMappingForm
   end
   object ComboBox4: TComboBox
     Left = 102
-    Top = 233
+    Top = 256
     Width = 97
     Height = 21
     Style = csDropDownList
@@ -195,7 +195,7 @@ object MIDIMappingForm: TMIDIMappingForm
   end
   object CheckBox3: TCheckBox
     Left = 102
-    Top = 260
+    Top = 283
     Width = 267
     Height = 17
     Caption = 'Output Effect Reference'
@@ -236,5 +236,13 @@ object MIDIMappingForm: TMIDIMappingForm
     Caption = 'Default'
     TabOrder = 14
     OnClick = Button3Click
+  end
+  object CheckBox5: TCheckBox
+    Left = 102
+    Top = 187
+    Width = 267
+    Height = 17
+    Caption = 'Legato Extras'
+    TabOrder = 15
   end
 end

@@ -21,22 +21,23 @@ type
 		ComboBox3: TComboBox;
 		Button1: TButton;
 		Button2: TButton;
-    CheckBox1: TCheckBox;
-    CheckBox2: TCheckBox;
-    ComboBox4: TComboBox;
-    CheckBox3: TCheckBox;
-    Label6: TLabel;
-    CheckBox4: TCheckBox;
-    Edit1: TEdit;
-    Label7: TLabel;
-    SpinEdit1: TSpinEdit;
-    Label8: TLabel;
-    Label9: TLabel;
-    Button3: TButton;
+		CheckBox1: TCheckBox;
+		CheckBox2: TCheckBox;
+		ComboBox4: TComboBox;
+		CheckBox3: TCheckBox;
+		Label6: TLabel;
+		CheckBox4: TCheckBox;
+		Edit1: TEdit;
+		Label7: TLabel;
+		SpinEdit1: TSpinEdit;
+		Label8: TLabel;
+		Label9: TLabel;
+		Button3: TButton;
+		CheckBox5: TCheckBox;
 		procedure ComboBox2Change(Sender: TObject);
-    procedure ComboBox3Change(Sender: TObject);
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure Button3Click(Sender: TObject);
+		procedure ComboBox3Change(Sender: TObject);
+		procedure FormClose(Sender: TObject; var Action: TCloseAction);
+		procedure Button3Click(Sender: TObject);
 	private
 		FMapping: PMIDIInsMapping;
 		FInstrument: TSIDInstrument;
@@ -111,6 +112,7 @@ procedure TMIDIMappingForm.DoPopulateControls;
 
 		SpinEdit1.Value:= FMapping^.BendRange div 100;
 
+		CheckBox5.Checked:= FMapping^.LegatoExtra;
 		CheckBox1.Checked:= FMapping^.ExtendForBend;
 		CheckBox2.Checked:= FMapping^.ChordMode;
 		ComboBox4.ItemIndex:= Ord(FMapping^.PWidthStyle);
@@ -173,7 +175,9 @@ procedure TMIDIMappingForm.FormClose(Sender: TObject; var Action: TCloseAction);
 			Inc(i);
 		FMapping^.Channel:= i;
 
-        FMapping^.BendRange:= SpinEdit1.Value * 100;
+		FMapping^.BendRange:= SpinEdit1.Value * 100;
+
+        FMapping^.LegatoExtra:= CheckBox5.Checked;
 
 		FMapping^.ExtendForBend:= CheckBox1.Checked;
 
