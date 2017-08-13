@@ -643,7 +643,10 @@ procedure TXSIDToMIDIMainForm.ButtonedEdit1RightButtonClick(Sender: TObject);
 		begin
 		ButtonedEdit1.Text:= OpenDialog1.FileName;
 
+        DoClearData;
+
 		DoLoadFile(ButtonedEdit1.Text);
+
 		DoInitialiseProject;
 		end;
 	end;
@@ -1576,7 +1579,7 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 
 //				SetLength(d, 2);
 				d[0]:= ANewNote;
-				d[1]:= Round((FSongRecompose[AIns, i].Sustain + 1) / 16 * 64 + 63);
+				d[1]:= Round(FSongRecompose[AIns, i].Sustain / 15 * 63 + 64);
 				DoAddNewMIDIEvent(eo, mefNoteOn, ch, d, ev, ATrack);
 
 				AddMIDIPitchBend(ANewCents);
@@ -1600,7 +1603,7 @@ procedure TXSIDToMIDIMainForm.DoDumpMIDIIns(var ASMF: TSMFFile; var ATrack: PSMF
 				begin
 				SetLength(d, 2);
 				d[0]:= ANewNote;
-				d[1]:= Round((FSongRecompose[AIns, i].Sustain + 1) / 16 * 64 + 63);
+				d[1]:= Round(FSongRecompose[AIns, i].Sustain / 15 * 63 + 64);
 				DoAddNewMIDIEvent(eo, mefNoteOn, ch, d, ev, ATrack);
 
 				nn[nc]:= ANewNote;
