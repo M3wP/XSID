@@ -54,7 +54,7 @@ begin
 result:=0;
 for i := numTotalBits downto 1 do begin
     range:=range shr 1;
-    t := ((Code - Range) shr 31);
+    t := (LongInt(Code - Range) shr 31);
     Code := Code - Range and (t - 1);
     result := (result shl 1) or (1 - t);
     if ((Range and kTopMask) = 0) then begin
