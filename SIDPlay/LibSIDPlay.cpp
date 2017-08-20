@@ -9,7 +9,7 @@
 
 
 extern "C" {
-	LIBSIDPLAY_API void* __stdcall DumpSIDCreate(char *name, char *fileName)
+	LIBSIDPLAY_API void* LIBSIDPLAY_CC DumpSIDCreate(char *name, char *fileName)
 	{
 		DumpSIDBuilder *dump = new DumpSIDBuilder(name);
 
@@ -17,31 +17,31 @@ extern "C" {
 		return dump;
 	}
 
-	LIBSIDPLAY_API void  __stdcall DumpSIDDestroy(void *dumpSID)
+	LIBSIDPLAY_API void  LIBSIDPLAY_CC DumpSIDDestroy(void *dumpSID)
 	{
 		DumpSIDBuilder *dump = reinterpret_cast<DumpSIDBuilder*>(dumpSID);
 		delete dump;
 	}
 
-	LIBSIDPLAY_API unsigned int  __stdcall DumpSIDCreateSIDs(void *dumpSID, unsigned int sids)
+	LIBSIDPLAY_API unsigned int  LIBSIDPLAY_CC DumpSIDCreateSIDs(void *dumpSID, unsigned int sids)
 	{
 		DumpSIDBuilder *dump = reinterpret_cast<DumpSIDBuilder*>(dumpSID);
 		return dump->create(sids);
 	}
 
-	LIBSIDPLAY_API bool  __stdcall DumpSIDGetStatus(void *dumpSID)
+	LIBSIDPLAY_API bool  LIBSIDPLAY_CC DumpSIDGetStatus(void *dumpSID)
 	{
 		DumpSIDBuilder *dump = reinterpret_cast<DumpSIDBuilder*>(dumpSID);
 		return dump->getStatus();
 	}
 
-	LIBSIDPLAY_API const char * __stdcall DumpSIDGetError(void *dumpSID)
+	LIBSIDPLAY_API const char * LIBSIDPLAY_CC DumpSIDGetError(void *dumpSID)
 	{
 		DumpSIDBuilder *dump = reinterpret_cast<DumpSIDBuilder*>(dumpSID);
 		return dump->error();
 	}
 	
-//	LIBSIDPLAY_API void * __stdcall DumpSIDGetEmulation(void * dumpSID)
+//	LIBSIDPLAY_API void * LIBSIDPLAY_CC DumpSIDGetEmulation(void * dumpSID)
 //	{
 //		DumpSIDBuilder *dump = reinterpret_cast<DumpSIDBuilder*>(dumpSID);
 //		return dump->get();

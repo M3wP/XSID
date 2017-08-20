@@ -1,3 +1,5 @@
+#include <cstdint>
+
 #ifdef LIBSIDPLAY_EXPORTS 
 #ifdef _MSC_VER
 #define LIBSIDPLAY_API __declspec(dllexport)
@@ -12,12 +14,21 @@
 #endif
 #endif
 
-#ifndef _MSC_VER
-#define __stdcall __attribute__((stdcall))
+#ifdef _MSC_VER
+#ifdef _WIN64
+#define LIBSIDPLAY_CC 
+#else
+#define LIBSIDPLAY_CC __stdcall
 #endif
-
-#include "stdint.h"
-
+#else
+#if INTPTR_MAX == INT64_MAX
+#define LIBSIDPLAY_CC 
+#elif INTPTR_MAX == INT32_MAX
+#define LIBSIDPLAY_CC __attribute__((stdcall))
+#else
+#error Unknown pointer size or missing size macros!
+#endif
+#endif
 
 //typedef enum { MONO = 1, STEREO } playback_t;
 //typedef enum { MOS6581, MOS8580 } sid_model_t;
@@ -26,12 +37,12 @@
 
 
 extern "C" {
-	LIBSIDPLAY_API void* __stdcall DumpSIDCreate(char *name, char *fileName);
-	LIBSIDPLAY_API void  __stdcall DumpSIDDestroy(void *dumpSID);
-	LIBSIDPLAY_API unsigned int  __stdcall DumpSIDCreateSIDs(void *dumpSID, unsigned int sids);
-	LIBSIDPLAY_API bool  __stdcall DumpSIDGetStatus(void *dumpSID);
-	LIBSIDPLAY_API const char * __stdcall DumpSIDGetError(void *dumpSID);
-//	LIBSIDPLAY_API void * __stdcall DumpSIDGetEmulation(void * dumpSID);
+	LIBSIDPLAY_API void* LIBSIDPLAY_CC DumpSIDCreate(char *name, char *fileName);
+	LIBSIDPLAY_API void  LIBSIDPLAY_CC DumpSIDDestroy(void *dumpSID);
+	LIBSIDPLAY_API unsigned int  LIBSIDPLAY_CC DumpSIDCreateSIDs(void *dumpSID, unsigned int sids);
+	LIBSIDPLAY_API bool  LIBSIDPLAY_CC DumpSIDGetStatus(void *dumpSID);
+	LIBSIDPLAY_API const char * LIBSIDPLAY_CC DumpSIDGetError(void *dumpSID);
+//	LIBSIDPLAY_API void * LIBSIDPLAY_CC DumpSIDGetEmulation(void * dumpSID);
 
 
 

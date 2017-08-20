@@ -1,3 +1,5 @@
+#include <cstdint>
+
 #ifdef _MSC_VER
 #include "stdafx.h"
 #endif
@@ -17,17 +19,29 @@
 #endif
 #endif
 
-#ifndef _MSC_VER
-#define __stdcall __attribute__((stdcall))
+#ifdef _MSC_VER
+#ifdef _WIN64
+#define LIBRESIDFP_CC 
+#else
+#define LIBRESIDFP_CC __stdcall
+#endif
+#else
+#if INTPTR_MAX == INT64_MAX
+#define LIBRESIDFP_CC 
+#elif INTPTR_MAX == INT32_MAX
+#define LIBRESIDFP_CC __attribute__((stdcall))
+#else
+#error Unknown pointer size or missing size macros!
+#endif
 #endif
 
 extern "C" {
-	LIBRESIDFP_API void* __stdcall ReSIDCreate(void);
-	LIBRESIDFP_API void  __stdcall ReSIDDestroy(void *reSID);
+	LIBRESIDFP_API void* LIBRESIDFP_CC ReSIDCreate(void);
+	LIBRESIDFP_API void  LIBRESIDFP_CC ReSIDDestroy(void *reSID);
 		
-	LIBRESIDFP_API int  __stdcall ReSIDClock(void* reSID, int cycles, short* buf);
-	LIBRESIDFP_API void __stdcall ReSIDWrite(void* reSID, int offset, unsigned char value);
-	LIBRESIDFP_API void __stdcall ReSIDSetSamplingParameters(void* reSID, double clockFrequency, reSIDfp::SamplingMethod method, double samplingFrequency, double highestAccurateFrequency);
-	LIBRESIDFP_API void __stdcall ReSIDSetChipModel(void* reSID, reSIDfp::ChipModel model);
-	LIBRESIDFP_API void __stdcall ReSIDClockSilent(void* reSID, int cycles);
+	LIBRESIDFP_API int  LIBRESIDFP_CC ReSIDClock(void* reSID, int cycles, short* buf);
+	LIBRESIDFP_API void LIBRESIDFP_CC ReSIDWrite(void* reSID, int offset, unsigned char value);
+	LIBRESIDFP_API void LIBRESIDFP_CC ReSIDSetSamplingParameters(void* reSID, double clockFrequency, reSIDfp::SamplingMethod method, double samplingFrequency, double highestAccurateFrequency);
+	LIBRESIDFP_API void LIBRESIDFP_CC ReSIDSetChipModel(void* reSID, reSIDfp::ChipModel model);
+	LIBRESIDFP_API void LIBRESIDFP_CC ReSIDClockSilent(void* reSID, int cycles);
 }

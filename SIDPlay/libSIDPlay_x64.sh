@@ -1,0 +1,1 @@
+g++ -shared -std=c++11 -fPIC -I src -I src/dump -I src/c64 -I src/c64/Banks -I src/c64/CIA -I src/c64/VIC_II -I src/c64/CPU -I src/sidtune -I src/utils/MD5 -Wp,-DLIBSIDPLAY_EXPORTS LibSIDPlay.cpp src/*.cpp src/dump/*.cpp src/c64/*.cpp src/c64/CIA/*.cpp src/c64/VIC_II/*.cpp src/c64/CPU/*.cpp src/sidtune/*.cpp src/utils/MD5/*.cpp -o ../libSIDPlay.so
