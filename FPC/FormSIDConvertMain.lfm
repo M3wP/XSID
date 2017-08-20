@@ -1,0 +1,361 @@
+object SIDConvertMainForm: TSIDConvertMainForm
+  Left = 200
+  Height = 459
+  Top = 174
+  Width = 824
+  AllowDropFiles = True
+  Caption = 'SID to XSID Conversion Utility'
+  ClientHeight = 459
+  ClientWidth = 824
+  Color = clBtnFace
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
+  OnDropFiles = FormDropFiles
+  OnShow = FormShow
+  LCLVersion = '1.6.4.0'
+  object Label4: TLabel
+    Left = 331
+    Height = 13
+    Top = 401
+    Width = 46
+    Caption = 'SID Type:'
+    ParentColor = False
+  end
+  object Label3: TLabel
+    Left = 331
+    Height = 13
+    Top = 347
+    Width = 38
+    Caption = 'System:'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    Left = 8
+    Height = 13
+    Top = 13
+    Width = 80
+    Caption = 'Output Format:'
+    ParentColor = False
+  end
+  object Label1: TLabel
+    Left = 331
+    Height = 13
+    Top = 87
+    Width = 54
+    Caption = 'Subsongs:'
+    ParentColor = False
+  end
+  object Label5: TLabel
+    Left = 8
+    Height = 13
+    Top = 65
+    Width = 35
+    Caption = 'Songs:'
+    ParentColor = False
+  end
+  object Label6: TLabel
+    Left = 543
+    Height = 13
+    Top = 136
+    Width = 59
+    Caption = 'SID Params:'
+    ParentColor = False
+  end
+  object Label7: TLabel
+    Left = 543
+    Height = 13
+    Top = 253
+    Width = 56
+    Caption = 'Meta Data:'
+    ParentColor = False
+  end
+  object Label8: TLabel
+    Left = 331
+    Height = 13
+    Top = 374
+    Width = 67
+    Caption = 'Update Rate:'
+    ParentColor = False
+  end
+  object Label9: TLabel
+    Left = 699
+    Height = 24
+    Top = 38
+    Width = 36
+    AutoSize = False
+    Caption = '   '
+    Font.Color = clWindowText
+    Font.Height = -21
+    Font.Name = 'Consolas'
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label10: TLabel
+    Left = 543
+    Height = 13
+    Top = 109
+    Width = 86
+    Caption = 'Override Length:'
+    ParentColor = False
+  end
+  object Label11: TLabel
+    Left = 242
+    Height = 13
+    Top = 13
+    Width = 114
+    Caption = 'Compression Method:'
+    ParentColor = False
+  end
+  object VirtualStringTree1: TVirtualStringTree
+    Left = 8
+    Height = 336
+    Top = 84
+    Width = 309
+    DragMode = dmAutomatic
+    DragOperations = [doCopy]
+    Header.AutoSizeIndex = 0
+    Header.Columns = <>
+    Header.Font.Color = clWindowText
+    Header.Font.Height = -11
+    Header.Font.Name = 'Tahoma'
+    Header.MainColumn = -1
+    TabOrder = 0
+    TreeOptions.MiscOptions = [toFullRepaintOnResize, toInitOnSave, toReportMode, toToggleOnDblClick, toWheelPanning, toEditOnClick]
+    TreeOptions.PaintOptions = [toShowDropmark, toThemeAware, toUseBlendedImages]
+    OnFocusChanged = VirtualStringTree1FocusChanged
+    OnGetText = VirtualStringTree1GetText
+  end
+  object VirtualStringTree2: TVirtualStringTree
+    Left = 331
+    Height = 195
+    Top = 106
+    Width = 200
+    Header.AutoSizeIndex = 0
+    Header.Columns = <>
+    Header.Font.Color = clWindowText
+    Header.Font.Height = -11
+    Header.Font.Name = 'Tahoma'
+    Header.MainColumn = -1
+    TabOrder = 1
+    TreeOptions.MiscOptions = [toCheckSupport, toFullRepaintOnResize, toInitOnSave, toReportMode, toToggleOnDblClick, toWheelPanning, toEditOnClick]
+    TreeOptions.PaintOptions = [toShowDropmark, toThemeAware, toUseBlendedImages]
+    OnChecking = VirtualStringTree2Checking
+    OnFocusChanged = VirtualStringTree2FocusChanged
+    OnFocusChanging = VirtualStringTree2FocusChanging
+    OnGetText = VirtualStringTree2GetText
+    OnInitNode = VirtualStringTree2InitNode
+  end
+  object ComboBox1: TComboBox
+    Left = 104
+    Height = 23
+    Top = 10
+    Width = 117
+    ItemHeight = 13
+    ItemIndex = 2
+    Items.Strings = (
+      'Format 0'
+      'Format 1'
+      '<Determine Best>'
+      '<Dump Only>'
+    )
+    Style = csDropDownList
+    TabOrder = 2
+    Text = '<Determine Best>'
+  end
+  object ComboBox2: TComboBox
+    Left = 427
+    Height = 23
+    Top = 344
+    Width = 104
+    Enabled = False
+    ItemHeight = 13
+    ItemIndex = 1
+    Items.Strings = (
+      'Default'
+      'PAL'
+      'NTSC'
+      'Any'
+    )
+    Style = csDropDownList
+    TabOrder = 3
+    Text = 'PAL'
+  end
+  object ComboBox3: TComboBox
+    Left = 427
+    Height = 23
+    Top = 398
+    Width = 104
+    ItemHeight = 13
+    ItemIndex = 0
+    Items.Strings = (
+      'Any'
+      'MOS6581'
+      'MOS8580'
+    )
+    OnChange = ComboBox3Change
+    Style = csDropDownList
+    TabOrder = 4
+    Text = 'Any'
+  end
+  object CheckBox6: TCheckBox
+    Left = 580
+    Height = 19
+    Top = 12
+    Width = 95
+    Alignment = taLeftJustify
+    Caption = 'Archive Songs:'
+    TabOrder = 5
+    Visible = False
+  end
+  object Memo1: TMemo
+    Left = 543
+    Height = 84
+    Top = 155
+    Width = 273
+    OnDragDrop = Memo1DragDrop
+    OnDragOver = Memo1DragOver
+    ScrollBars = ssVertical
+    TabOrder = 6
+  end
+  object Memo2: TMemo
+    Left = 543
+    Height = 148
+    Top = 272
+    Width = 273
+    OnDragDrop = Memo2DragDrop
+    OnDragOver = Memo2DragOver
+    ScrollBars = ssVertical
+    TabOrder = 7
+  end
+  object Button2: TButton
+    Left = 741
+    Height = 25
+    Top = 426
+    Width = 75
+    Caption = 'Play'
+    OnClick = Button2Click
+    TabOrder = 8
+  end
+  object Button1: TButton
+    Left = 741
+    Height = 25
+    Top = 8
+    Width = 75
+    Caption = 'Configure...'
+    OnClick = Button1Click
+    TabOrder = 9
+  end
+  object ComboBox4: TComboBox
+    Left = 427
+    Height = 23
+    Top = 371
+    Width = 104
+    ItemHeight = 13
+    ItemIndex = 4
+    Items.Strings = (
+      '1X'
+      '2X'
+      '4X'
+      '8X'
+      '16X'
+    )
+    OnChange = ComboBox4Change
+    Style = csDropDownList
+    TabOrder = 10
+    Text = '16X'
+  end
+  object Button3: TButton
+    Left = 741
+    Height = 25
+    Top = 37
+    Width = 75
+    Caption = 'Convert'
+    OnClick = Button3Click
+    TabOrder = 11
+  end
+  object Button4: TButton
+    Left = 456
+    Height = 25
+    Top = 426
+    Width = 75
+    Caption = 'Reset'
+    OnClick = Button4Click
+    TabOrder = 12
+  end
+  object Button5: TButton
+    Left = 456
+    Height = 25
+    Top = 307
+    Width = 75
+    Caption = 'Select All'
+    OnClick = Button5Click
+    TabOrder = 13
+  end
+  object Button6: TButton
+    Left = 375
+    Height = 25
+    Top = 307
+    Width = 75
+    Caption = 'Defaut'
+    OnClick = Button6Click
+    TabOrder = 14
+  end
+  object Button7: TButton
+    Left = 242
+    Height = 25
+    Top = 426
+    Width = 75
+    Caption = 'Clear'
+    OnClick = Button7Click
+    TabOrder = 15
+  end
+  object MaskEdit1: TMaskEdit
+    Left = 674
+    Height = 21
+    Top = 106
+    Width = 61
+    Alignment = taRightJustify
+    CharCase = ecNormal
+    MaxLength = 5
+    TabOrder = 16
+    OnKeyPress = MaskEdit1KeyPress
+    EditMask = '!99:99;1;0'
+    Text = '  : 1'
+    SpaceChar = '0'
+  end
+  object Button8: TButton
+    Left = 741
+    Height = 25
+    Top = 104
+    Width = 75
+    Caption = 'Reset'
+    OnClick = Button8Click
+    TabOrder = 17
+  end
+  object ComboBox5: TComboBox
+    Left = 375
+    Height = 23
+    Top = 10
+    Width = 156
+    ItemHeight = 13
+    ItemIndex = 2
+    Items.Strings = (
+      'None - Largest, Fastest'
+      'Deflate - Smaller, Faster'
+      'LZMA - Smallest, Slower'
+    )
+    Style = csDropDownList
+    TabOrder = 18
+    Text = 'LZMA - Smallest, Slower'
+  end
+  object Timer1: TTimer
+    Enabled = False
+    Interval = 200
+    OnTimer = Timer1Timer
+    left = 728
+    top = 4
+  end
+end

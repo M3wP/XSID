@@ -1,0 +1,154 @@
+object XSIDPlayMainForm: TXSIDPlayMainForm
+  Left = 305
+  Height = 433
+  Top = 168
+  Width = 615
+  Caption = 'XSID Player'
+  ClientHeight = 433
+  ClientWidth = 615
+  Color = clBtnFace
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  LCLVersion = '1.6.4.0'
+  object Label1: TLabel
+    Left = 8
+    Height = 13
+    Top = 48
+    Width = 24
+    Caption = 'Title:'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    Left = 8
+    Height = 13
+    Top = 67
+    Width = 30
+    Caption = 'Artist:'
+    ParentColor = False
+  end
+  object Label3: TLabel
+    Left = 60
+    Height = 1
+    Top = 48
+    Width = 1
+    ParentColor = False
+  end
+  object Label4: TLabel
+    Left = 60
+    Height = 1
+    Top = 67
+    Width = 1
+    ParentColor = False
+  end
+  object Label5: TLabel
+    Left = 268
+    Height = 13
+    Top = 48
+    Width = 36
+    Caption = 'Album:'
+    ParentColor = False
+  end
+  object Label6: TLabel
+    Left = 268
+    Height = 13
+    Top = 67
+    Width = 27
+    Caption = 'Date:'
+    ParentColor = False
+  end
+  object Label7: TLabel
+    Left = 268
+    Height = 13
+    Top = 86
+    Width = 73
+    Caption = 'Track Number:'
+    ParentColor = False
+  end
+  object Label8: TLabel
+    Left = 356
+    Height = 1
+    Top = 48
+    Width = 1
+    ParentColor = False
+  end
+  object Label9: TLabel
+    Left = 356
+    Height = 1
+    Top = 67
+    Width = 1
+    ParentColor = False
+  end
+  object Label10: TLabel
+    Left = 356
+    Height = 1
+    Top = 86
+    Width = 1
+    ParentColor = False
+  end
+  object Button1: TButton
+    Left = 8
+    Height = 25
+    Top = 8
+    Width = 75
+    Caption = 'Load...'
+    OnClick = Button1Click
+    TabOrder = 0
+  end
+  object TrackBar1: TTrackBar
+    Left = 8
+    Height = 24
+    Top = 112
+    Width = 599
+    PageSize = 1000
+    Position = 0
+    ShowSelRange = False
+    TickStyle = tsNone
+    TabOrder = 1
+  end
+  object Button2: TButton
+    Left = 532
+    Height = 25
+    Top = 8
+    Width = 75
+    Caption = 'Configure...'
+    OnClick = Button2Click
+    TabOrder = 2
+  end
+  object Button3: TButton
+    Left = 8
+    Height = 25
+    Top = 148
+    Width = 75
+    Caption = 'Pause'
+    Enabled = False
+    OnClick = Button3Click
+    TabOrder = 3
+  end
+  object ListBox1: TListBox
+    Left = 396
+    Height = 129
+    Top = 296
+    Width = 211
+    ItemHeight = 0
+    TabOrder = 4
+  end
+  object ListBox2: TListBox
+    Left = 396
+    Height = 129
+    Top = 148
+    Width = 211
+    ItemHeight = 0
+    TabOrder = 5
+  end
+  object OpenDialog1: TOpenDialog
+    Title = 'Open VSID File...'
+    DefaultExt = '.vsid'
+    Filter = 'XSID Files (*.xsid)|*.xsid'
+    left = 336
+    top = 8
+  end
+end

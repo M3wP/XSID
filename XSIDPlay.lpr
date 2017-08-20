@@ -1,0 +1,47 @@
+program XSIDPlay;
+
+{$MODE Delphi}
+
+{$IFDEF UNIX}
+	{$DEFINE USECTHREADS}
+{$ENDIF}
+
+uses
+{$IFDEF UNIX}
+  cthreads,
+{$ENDIF}
+  Forms,
+  Interfaces,
+  FormXSIDPlayMain in 'FPC/FormXSIDPlayMain.pas' {XSIDPlayMainForm},
+  C64Thread in 'Common/C64Thread.pas',
+  C64Types in 'Common/C64Types.pas',
+  OpenAL in 'Common/openal.pas',
+  ReSIDFP in 'Common/ReSIDFP.pas',
+  XSIDFiles in 'Common/XSIDFiles.pas',
+  XSIDThread in 'Common/XSIDThread.pas',
+  XSIDTypes in 'Common/XSIDTypes.pas',
+  FormXSIDConfig in 'Common/FormXSIDConfig.pas' {XSIDConfigForm},
+  FormXSIDFilterConfig in 'Common/FormXSIDFilterConfig.pas' {XSIDFilterConfigForm},
+  ULZBinTree in 'LZMA.442b\compression\LZ\ULZBinTree.pas',
+  ULZInWindow in 'LZMA.442b\compression\LZ\ULZInWindow.pas',
+  ULZOutWindow in 'LZMA.442b\compression\LZ\ULZOutWindow.pas',
+  ULZMABase in 'LZMA.442b\compression\LZMA\ULZMABase.pas',
+  ULZMACommon in 'LZMA.442b\compression\LZMA\ULZMACommon.pas',
+  ULZMADecoder in 'LZMA.442b\compression\LZMA\ULZMADecoder.pas',
+  ULZMAEncoder in 'LZMA.442b\compression\LZMA\ULZMAEncoder.pas',
+  UBitTreeDecoder in 'LZMA.442b\compression\RangeCoder\UBitTreeDecoder.pas',
+  UBitTreeEncoder in 'LZMA.442b\compression\RangeCoder\UBitTreeEncoder.pas',
+  URangeDecoder in 'LZMA.442b\compression\RangeCoder\URangeDecoder.pas',
+  URangeEncoder in 'LZMA.442b\compression\RangeCoder\URangeEncoder.pas',
+  XSIDAudioDump in 'Common/XSIDAudioDump.pas';
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+{$IFDEF MSWINDOWS}
+  Application.MainFormOnTaskbar := True;
+{$ENDIF}
+  Application.CreateForm(TXSIDPlayMainForm, XSIDPlayMainForm);
+  Application.Run;
+end.
