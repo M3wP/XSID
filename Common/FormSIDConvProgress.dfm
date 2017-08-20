@@ -58,6 +58,7 @@ object SIDConvProgressForm: TSIDConvProgressForm
     Top = 32
     Width = 358
     Height = 17
+    Smooth = True
     TabOrder = 0
   end
   object ProgressBar2: TProgressBar
@@ -65,6 +66,7 @@ object SIDConvProgressForm: TSIDConvProgressForm
     Top = 84
     Width = 358
     Height = 17
+    Smooth = True
     TabOrder = 1
   end
   object ProgressBar3: TProgressBar
@@ -72,6 +74,7 @@ object SIDConvProgressForm: TSIDConvProgressForm
     Top = 124
     Width = 358
     Height = 17
+    Smooth = True
     TabOrder = 2
   end
 end
