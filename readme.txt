@@ -196,13 +196,16 @@ for the DLLs.
 Alternatively, you may now use FPC/Lazarus and G++ to compile the binaries.  
 FPC version 3.0.2 and Lazarus 1.6.4 are the minimum supported versions.
 
-To compile the libraries on Linux, use the .sh files located in the ReSID and 
-SIDPlay directories.  The .so files are created in the project directory.
+You will need to install the VirtualTreeView package (and LCLExtensions for
+Lazarus) into Delphi or Lazarus to compile all of the applications.
 
 On Linux, you will also need to have installed the OpenAL-dev package.
 
+To compile the libraries on Linux, use the .sh files located in the ReSID and 
+SIDPlay directories.  The .so files are created in the project directory.
+
 On Windows, you will need to manually copy the resulting .DLL files into the
-main directory.
+appropriate directories.
 
 Using Delphi, open the relevant .dproj or .dpr file and compile.  For 
 FPC/Lazarus, open the .lpi file and compile.
