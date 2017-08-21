@@ -22,6 +22,14 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+Quick Download
+--------------
+
+You'll find the binaries in the Distribution directory.
+
+https://github.com/M3wP/XSID/tree/master/Distribution
+
+
 Introduction
 ------------
 
