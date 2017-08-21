@@ -65,9 +65,10 @@ implementation
 uses
 	SyncObjs, C64Types, FormXSIDConfig,
 {$IFDEF MSWINDOWS}
-    XSIDAudioDSound,
-{$ENDIF}
+    XSIDAudioDSound;
+{$ELSE}
     XSIDAudioOpenAL;
+{$ENDIF}
 
 {$R *.lfm}
 
