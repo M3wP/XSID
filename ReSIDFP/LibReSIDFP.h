@@ -40,8 +40,10 @@ extern "C" {
 	LIBRESIDFP_API void  LIBRESIDFP_CC ReSIDDestroy(void *reSID);
 		
 	LIBRESIDFP_API int  LIBRESIDFP_CC ReSIDClock(void* reSID, int cycles, short* buf);
+	LIBRESIDFP_API unsigned char LIBRESIDFP_CC ReSIDRead(void* reSID, int offset);
 	LIBRESIDFP_API void LIBRESIDFP_CC ReSIDWrite(void* reSID, int offset, unsigned char value);
 	LIBRESIDFP_API void LIBRESIDFP_CC ReSIDSetSamplingParameters(void* reSID, double clockFrequency, reSIDfp::SamplingMethod method, double samplingFrequency, double highestAccurateFrequency);
 	LIBRESIDFP_API void LIBRESIDFP_CC ReSIDSetChipModel(void* reSID, reSIDfp::ChipModel model);
 	LIBRESIDFP_API void LIBRESIDFP_CC ReSIDClockSilent(void* reSID, int cycles);
+	LIBRESIDFP_API void LIBRESIDFP_CC ReSIDMute(void* reSID, int channel, bool enable);
 }

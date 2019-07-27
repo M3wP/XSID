@@ -233,7 +233,8 @@ procedure TXSIDConfigForm.ComboBox6Change(Sender: TObject);
 	begin
 	if not FPopulating then
 		begin
-		FConfig.Renderer:= GlobalRenderers[ComboBox6.ItemIndex].GetName;
+//		FConfig.Renderer:= GlobalRenderers[ComboBox6.ItemIndex].GetName;
+		FConfig.Renderer:= AnsiString(ComboBox6.Items[ComboBox6.ItemIndex]);
 		DoSetupRenderParam;
 
 		Button2.Enabled:= FConfig.Changed;
@@ -436,10 +437,13 @@ procedure TXSIDConfigForm.PopulateDialog;
 
 		ComboBox6.Items.Clear;
 		for i:= 0 to GlobalRenderers.Count - 1 do
-			ComboBox6.Items.Add(string(GlobalRenderers[i].GetName));
+			if  FConfig.WantFreeRender
+			or  GlobalRenderers[i].GetIsRealTime then
+				ComboBox6.Items.Add(string(GlobalRenderers[i].GetName));
 
 		r:= GlobalRenderers.ItemByName(FConfig.Renderer);
-		i:= GlobalRenderers.IndexOf(r);
+//		i:= GlobalRenderers.IndexOf(r);
+		i:= ComboBox6.Items.IndexOf(string(r.GetName));
 		ComboBox6.ItemIndex:= i;
 
 		DoSetupRenderParam;

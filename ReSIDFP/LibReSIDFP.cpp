@@ -24,6 +24,12 @@ extern "C" {
 		return sid->clock(cycles, buf);
 	}
 
+	LIBRESIDFP_API unsigned char LIBRESIDFP_CC ReSIDRead(void* reSID, int offset)
+	{
+		reSIDfp::SID *sid = reinterpret_cast<reSIDfp::SID*>(reSID);
+		return sid->read(offset);
+	}
+
 	LIBRESIDFP_API void LIBRESIDFP_CC ReSIDWrite(void* reSID, int offset, unsigned char value)
 	{
 		reSIDfp::SID *sid = reinterpret_cast<reSIDfp::SID*>(reSID);
@@ -70,5 +76,11 @@ extern "C" {
 	{
 		reSIDfp::SID *sid = reinterpret_cast<reSIDfp::SID*>(reSID);
 		sid->clockSilent(cycles);
+	}
+
+	LIBRESIDFP_API void LIBRESIDFP_CC ReSIDMute(void* reSID, int channel, bool enable)
+	{
+		reSIDfp::SID *sid = reinterpret_cast<reSIDfp::SID*>(reSID);
+		sid->mute(channel, enable);
 	}
 }

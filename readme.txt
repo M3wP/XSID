@@ -29,6 +29,13 @@ You'll find the binaries in the Distribution directory.
 
 https://github.com/M3wP/XSID/tree/master/Distribution
 
+Please note that the Linux distribution is currently out-of-date.  You will 
+likely want to compile it for yourself on this platform.
+
+At this point, no MacOS binaries are available.  You will need to compile these
+for yourself.  If you do, I would love to hear from you and get a copy of the
+files.
+
 
 Introduction
 ------------
@@ -82,12 +89,16 @@ or instruments are converted to MIDI.
 You can output individual instruments or the whole song in a number of ways.
 
 
-Usage
------
+Usage - XSID Play
+-----------------
 
 XSID Play is currently very simple to use.  Simply click the "Load" button and
 select the XSID file to be played.  You can seek through the track by using the
 track bar.
+
+
+Usage - SID Convert
+-------------------
 
 SID Convert is also simple to use.  You will need to first configure the 
 application for use.  You will need to supply the location of the 
@@ -99,6 +110,10 @@ VICE VSID executable which will allow you to preview the SID files.
 Drag and drop the SID files to be converted onto the file list window (on the 
 far left).  Select the tunes to be converted.  Click the "Convert" button to
 perform the conversion.
+
+
+Usage - XSID To MIDI
+--------------------
 
 To use the XSID To MIDI tool, open the XSID file or Load an existing 
 XSID To MIDI project and you will be presented with a list of instruments 
@@ -164,6 +179,23 @@ channel and playback your MIDI file!
 You can save your project to file, if you desire.
 
 
+Usage - XSID List
+-----------------
+
+XSID List is currently in development and only features a very minimal 
+compliment of tools in comparison to the final version.  It is intended that it
+will become a comprehensive XSID editing tool.
+
+To open an XSID file, simply select File | Open and browse to and select the 
+XSID file to open.  A list of the events in the file is shown.
+
+You can select an event as the starting event and playback (toggled using the
+Space key) is started from that point.  The present position in the file is
+shown as the XSID file is played.
+
+More detailed information about this application will be given as it evolves.
+
+
 Known Limitations
 -----------------
 
@@ -192,6 +224,11 @@ There is a forth-coming tool, XSID List, which can help you view XSID files.
 Effects such as Ring Modulation and Osciallator Synchronisation are detected 
 and used in the instrument/patch determinations but are not used in the 
 reproductions (since these require multiple voices).
+
+XSID List will cause unexpected errors in quite a few cases.  These will be 
+fixed as development continues.  In addition, memory will be leaked if a file
+is opened when one is already open.  It is better to open only one file per
+session/instance of XSID List.  This will also be addressed in the future.
 
 
 Compiling

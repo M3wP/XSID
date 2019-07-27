@@ -48,6 +48,8 @@ type
 function XSIDLoadFileXSID(const AFileName: string; const AEvents: TList;
 		const ACallback: TXSIDFileCallback; out AXSIDFileConfig: TXSIDFileConfig): Cardinal;
 
+procedure XSIDSaveFileDump(const AFileName: string; const AEvents: TList);
+
 
 implementation
 
@@ -59,6 +61,34 @@ uses
 	zstream,
 {$ENDIF}
 	ULZBinTree, URangeEncoder, ULZMADecoder;
+
+
+procedure XSIDSaveFileDump(const AFileName: string; const AEvents: TList);
+	var
+	f: TStringStream;
+	i: Integer;
+	ev: PXSIDEvent;
+	s: string;
+
+	begin
+	f:= TStringStream.Create;
+	try
+		for i:= 0 to AEvents.Count - 1 do
+			begin
+			ev:= PXSIDEvent(AEvents[i]);
+
+			s:= IntToStr(ev^.offs) + ' ' + IntToStr(ev^.data.reg) + ' ' +
+					IntToStr(ev^.data.val) + sLineBreak;
+
+			f.WriteString(s);
+			end;
+
+		f.SaveToFile(AFileName);
+
+		finally
+		f.Free;
+		end;
+	end;
 
 type
 	TXSIDHeaderRec = packed record

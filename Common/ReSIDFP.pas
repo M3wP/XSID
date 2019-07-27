@@ -55,6 +55,7 @@ procedure ReSIDSetFilter8580Curve(reSID: Pointer; curve: Double); external LIB_R
 procedure ReSIDEnableFilter(reSID: Pointer; enable: LongBool); external LIB_RESID;
 procedure ReSIDInput(reSID: Pointer; value: Integer); external LIB_RESID;
 procedure ReSIDClockSilent(reSID: Pointer; cycles: Integer); external LIB_RESID;
+procedure ReSIDMute(reSID: Pointer; channel: Integer; enable: LongBool); external LIB_RESID;
 {$ELSE}
 {$IFDEF MSWINDOWS}
 function  ReSIDCreate: Pointer; stdcall; external LIB_RESID name '_ReSIDCreate@0';
@@ -69,6 +70,7 @@ procedure ReSIDSetFilter8580Curve(reSID: Pointer; curve: Double); stdcall; exter
 procedure ReSIDEnableFilter(reSID: Pointer; enable: LongBool); stdcall; external LIB_RESID name '_ReSIDEnableFilter@8';
 procedure ReSIDInput(reSID: Pointer; value: Integer); stdcall; external LIB_RESID name '_ReSIDInput@8';
 procedure ReSIDClockSilent(reSID: Pointer; cycles: Integer); stdcall; external LIB_RESID name '_ReSIDClockSilent@8';
+procedure ReSIDMute(reSID: Pointer; channel: Integer; enable: LongBool); stdcall; external LIB_RESID name '_ReSIDMute@12';
 {$ELSE}
 function  ReSIDCreate: Pointer; stdcall; external LIB_RESID;
 procedure ReSIDDestroy(reSID: Pointer); stdcall; external LIB_RESID;
@@ -82,6 +84,7 @@ procedure ReSIDSetFilter8580Curve(reSID: Pointer; curve: Double); stdcall; exter
 procedure ReSIDEnableFilter(reSID: Pointer; enable: LongBool); stdcall; external LIB_RESID;
 procedure ReSIDInput(reSID: Pointer; value: Integer); stdcall; external LIB_RESID;
 procedure ReSIDClockSilent(reSID: Pointer; cycles: Integer); stdcall; external LIB_RESID;
+procedure ReSIDMute(reSID: Pointer; channel: Integer; enable: LongBool); stdcall; external LIB_RESID;
 {$ENDIF}
 {$ENDIF}
 

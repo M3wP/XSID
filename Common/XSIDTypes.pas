@@ -37,6 +37,8 @@ type
 
 	TXSIDContext = array[0..24] of TXSIDCtxReg;
 
+	TXSIDRegisters = set of $00..$18;
+
 
 const
 //	siddefs-fp.h
@@ -348,6 +350,7 @@ type
 		FDigiBoostEnable: Boolean;
 
 //		Audio interface
+		FWantFreeRender: Boolean;
 		FRenderer: AnsiString;
 		FRenderParams: TStringList;
 		FSampleRate: TXSIDSampleRate;
@@ -394,6 +397,9 @@ type
 		function  GetFreqFactor: TXSIDFloat;
 
 //		Audio interface
+		procedure SetWantFreeRender(AValue: Boolean);
+		function  GetWantFreeRender: Boolean;
+
 		procedure SetRenderer(AValue: AnsiString);
 		function  GetRenderer: AnsiString;
 
@@ -450,6 +456,8 @@ type
 		property  FreqFactor: TXSIDFloat read GetFreqFactor;
 
 //		Audio interface
+		property  WantFreeRender: Boolean
+				read GetWantFreeRender write SetWantFreeRender;
 		property  Renderer: AnsiString read GetRenderer write SetRenderer;
 //dengland Need proper interface for params...
 
@@ -463,15 +471,6 @@ type
 
 
 var
-//dengland  I suspect that these should be put into the objects or made
-//		threadvars
-//todo Check the usage of these globals
-//	wave.h
-//	dac: TArrDac;
-//	wftable: array[0..10, 0..4095] of TXSIDFloat;
-//	envelope.h
-//	env_dac: array[0..255] of TXSIDFloat;
-
 	GlobalEventPool: TXSIDEventPool;
 
 
@@ -980,6 +979,8 @@ procedure TXSIDConfig.LoadFromIniFile(const AIniFile: TIniFile);
 		FDigiBoostEnable:= b;
 
 //		Read the Audio settings
+//		FWantFreeRender:= AIniFile.ReadBool('Audio', 'WantFreeRender', True);
+
 		s:= AIniFile.ReadString('Audio', 'Renderer', string(FRenderer));
 		SetRenderer(AnsiString(s));
 
@@ -1031,7 +1032,9 @@ procedure TXSIDConfig.SaveToIniFile(const AIniFile: TIniFile);
 
 		AIniFile.WriteBool('SID', 'DigiBoostEnable', FDigiBoostEnable);
 
-//		Read the Audio settings
+//		Write the Audio settings
+//		AIniFile.WriteBool('Audio', 'WantFreeRender', FWantFreeRender);
+
 		AIniFile.WriteString('Audio', 'Renderer', string(FRenderer));
 
 		AIniFile.WriteInteger('Audio', 'SampleRate', Ord(FSampleRate));
@@ -1166,13 +1169,35 @@ procedure TXSIDConfig.SetUpdateRateOverride(const AValue: Boolean);
 		end;
 	end;
 
+procedure TXSIDConfig.SetWantFreeRender(AValue: Boolean);
+	begin
+	FLock.Acquire;
+	try
+		if  AValue <> FWantFreeRender then
+			begin
+			FWantFreeRender:= AValue;
+			FChanged:= True;
+			end;
+
+		finally
+		FLock.Release;
+		end;
+	end;
+
 function TXSIDConfig.GetSysCyclesPerUpdate: TC64Float;
 	var
 	f: Integer;
 
 	begin
-	f:= 1 shl Ord(FUpdateRate);
-	Result:= ARR_VAL_SYSCYCPRFS[FSystem] / f;
+	FLock.Acquire;
+	try
+
+		f:= 1 shl Ord(FUpdateRate);
+		Result:= ARR_VAL_SYSCYCPRFS[FSystem] / f;
+
+		finally
+		FLock.Release;
+		end;
 	end;
 
 function TXSIDConfig.GetSystem: TC64SystemType;
@@ -1213,6 +1238,17 @@ function TXSIDConfig.GetUpdateRateOverride: Boolean;
 	FLock.Acquire;
 	try
 		Result:= FUpdateRateOverride;
+
+		finally
+		FLock.Release;
+		end;
+	end;
+
+function TXSIDConfig.GetWantFreeRender: Boolean;
+	begin
+	FLock.Acquire;
+	try
+		Result:= FWantFreeRender;
 
 		finally
 		FLock.Release;
@@ -1411,6 +1447,7 @@ constructor TXSIDConfig.Create(const AIniFile: TIniFile;
 	FFilter8580:= ARR_VAL_TYPE4PROPS[rm4R5];
 	FDigiBoostEnable:= VAL_DEF_DIGIBSTENB;
 
+	FWantFreeRender:= True;
 	FRenderer:= GlobalRenderers.DefaultRenderer.GetName;
 	FRenderParams:= TStringList.Create;
 	GlobalRenderers.DefaultRenderer.FillParameterNames(FRenderParams);
@@ -1463,6 +1500,7 @@ procedure TXSIDConfig.Assign(AConfig: TXSIDConfig);
 			FFilter8580:= AConfig.FFilter8580;
 			FDigiBoostEnable:= AConfig.FDigiBoostEnable;
 
+			FWantFreeRender:= AConfig.FWantFreeRender;
 			FRenderer:= AConfig.FRenderer;
 			FRenderParams.Clear;
 			FRenderParams.AddStrings(AConfig.FRenderParams);

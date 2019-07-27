@@ -61,7 +61,8 @@ SID::SID() :
     voice[1] = new Voice();
     voice[2] = new Voice();
 
-    muted[0] = muted[1] = muted[2] = false;
+//dengland Added one for "muting" the filter "samples"
+    muted[0] = muted[1] = muted[2] = muted[3] = false;
 
     reset();
     setChipModel(MOS8580);
@@ -200,8 +201,15 @@ void SID::writeImmediate(int offset, unsigned char value)
         break;
 
     case 0x18:
-        filter6581->writeMODE_VOL(value);
-        filter8580->writeMODE_VOL(value);
+//dengland In the case we're trying to mute the filter "samples", just write max volume
+		if (!muted[3]) {
+        	filter6581->writeMODE_VOL(value);
+        	filter8580->writeMODE_VOL(value);
+			} 
+		else { 
+			filter6581->writeMODE_VOL(15);
+			filter8580->writeMODE_VOL(15);
+			}
         break;
 
     default:

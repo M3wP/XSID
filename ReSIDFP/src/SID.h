@@ -108,7 +108,8 @@ private:
     unsigned char busValue;
 
     /// Flags for muted channels
-    bool muted[3];
+//dengland I'm adding one more for the filter (to prevent "sample" play back)
+    bool muted[4];
 
 private:
     /**

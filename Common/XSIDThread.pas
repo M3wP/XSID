@@ -53,7 +53,7 @@ type
 				var AContext: TXSIDContext): Integer;
 
 		procedure Clock(const ATicks: cycle_count; var ADeltaT: cycle_count;
-				var AEvents: TXSIDEventArr);
+				var AEvents: TXSIDEventArr; out AEventIndex: Integer);
 	end;
 
 
@@ -64,7 +64,7 @@ type
 		Perf: TXSIDFloat;
 		CmpOffs,
 		BufSiz: Integer;
-		EvtCnt,
+		EvtCnt: Integer deprecated;
 		EvtIdx: Integer;
 		Peak: TXSIDFloat;
 		Clipped: Boolean;
@@ -91,7 +91,7 @@ type
 		procedure Execute; override;
 
 		procedure UpdateFrontEnd(DeltaT, Ticks: cycle_count; Perf: TXSIDFloat;
-				CmpOffs, BufSize, EventCount, EventIdx: Integer;
+				CmpOffs, BufSize, {EventCount, }EventIdx: Integer;
 				peak: TXSIDFloat; clipped: Boolean);
 
 	public
@@ -129,7 +129,8 @@ type
 		procedure DoClock(const ATicks: Cardinal); override;
 		procedure DoPause; override;
 		procedure DoPlay; override;
-		procedure UpdateFrontEnd(const ATicks: Cardinal); override;
+		procedure UpdateFrontEnd(const ATicks: Cardinal;
+				const AEventIndex: Integer); override;
 
 	public
 		constructor Create(const AConfig: TXSIDConfig;
@@ -137,6 +138,7 @@ type
 				const AEvents: TXSIDEventManager = nil);
 
 		procedure SetEnabled(const AVoice: reg8; const AEnable: Boolean);
+        procedure EnableFilter(const AEnable: Boolean);
 		procedure SetGain(AValue: reg8);
 		procedure RestoreContext(AContext: TXSIDContext);
 		procedure Zoom(const ACycles: Cardinal);
@@ -469,7 +471,8 @@ function TXSIDEventManager.Seek({const AQueue: TXSIDEventQueue;}
 	end;
 
 procedure TXSIDEventManager.Clock(const ATicks: cycle_count;
-		var ADeltaT: cycle_count; var AEvents: TXSIDEventArr);
+		var ADeltaT: cycle_count; var AEvents: TXSIDEventArr;
+		out AEventIndex: Integer);
 	var
 //	i: TXSIDEventQueue;
 //	d: array[TXSIDEventQueue] of Boolean;
@@ -613,6 +616,9 @@ procedure TXSIDEventManager.Clock(const ATicks: cycle_count;
 //		else
 //			Dec(FThsTick);
 //		end;
+
+
+	AEventIndex:= FQueue.Index;
 	end;
 
 
@@ -704,7 +710,7 @@ destructor TXSIDStatsThread.Destroy;
 	end;
 
 procedure TXSIDStatsThread.UpdateFrontEnd(DeltaT, Ticks: cycle_count;
-		Perf: TXSIDFloat; CmpOffs, BufSize, EventCount, EventIdx: Integer;
+		Perf: TXSIDFloat; CmpOffs, BufSize, {EventCount, }EventIdx: Integer;
 		peak: TXSIDFloat; clipped: Boolean);
 	begin
 //	if  FLock.TryEnter then
@@ -715,7 +721,7 @@ procedure TXSIDStatsThread.UpdateFrontEnd(DeltaT, Ticks: cycle_count;
 			FStats.Perf:= Perf;
 			FStats.CmpOffs:= CmpOffs;
 			FStats.BufSiz:= BufSize;
-			FStats.EvtCnt:= EventCount;
+//			FStats.EvtCnt:= EventCount;
 			FStats.EvtIdx:= EventIdx;
 			FStats.Peak:= peak;
 			FStats.Clipped:= clipped;
@@ -852,16 +858,22 @@ procedure TXSIDThread.DoPause;
 procedure TXSIDThread.DoPlay;
 	var
 	t: cycle_count;
+	idx: Integer;
 
 	begin
 	FAudio.Play(FBuffer);
 	if  FZoomCycles > 0 then
 		begin
 		ReSIDClockSilent(FReSID, FZoomCycles);
-		GlobalEvents.Clock(FZoomCycles, t, FEventData);
+		GlobalEvents.Clock(FZoomCycles, t, FEventData, idx);
 		FZoomCycles:= 0;
 		end;
 	FConfig.Started:= True;
+	end;
+
+procedure TXSIDThread.EnableFilter(const AEnable: Boolean);
+	begin
+	ReSIDEnableFilter(FReSID, AEnable);
 	end;
 
 procedure TXSIDThread.RestoreContext(AContext: TXSIDContext);
@@ -898,7 +910,8 @@ procedure TXSIDThread.DoClock(const ATicks: Cardinal);
 	var
 	t: cycle_count;
 	i,
-	j: Integer;
+	j,
+	idx: Integer;
 //	doEvent: Boolean;
 
 	begin
@@ -910,10 +923,10 @@ procedure TXSIDThread.DoClock(const ATicks: Cardinal);
 	FLstTick:= ATicks;
 	while (FLstTick > 0) and (not Terminated) do
 		begin
-		FEvents.Clock(FLstTick, t, FEventData);
+		FEvents.Clock(FLstTick, t, FEventData, idx);
 		Dec(FLstTick, t);
 
-		UpdateFrontEnd(t);
+		UpdateFrontEnd(t, idx);
 
 		while (t > 0) and (not Terminated) do
 			begin
@@ -960,7 +973,8 @@ procedure TXSIDThread.DoClock(const ATicks: Cardinal);
 	FThsTick:= 0;
 	end;
 
-procedure TXSIDThread.UpdateFrontEnd(const ATicks: Cardinal);
+procedure TXSIDThread.UpdateFrontEnd(const ATicks: Cardinal;
+		const AEventIndex: Integer);
 	var
 	p: Single;
 
@@ -971,7 +985,7 @@ procedure TXSIDThread.UpdateFrontEnd(const ATicks: Cardinal);
 
 		FStatsThrd.UpdateFrontEnd(FLstTick, ATicks, p,  FCmpOffs, FBufIdx,
 //				FThsTick, FLstTick, FReSID.peakoutput, FReSID.clipped);
-				ATicks, FLstTick, 0, False);
+				AEventIndex, {FLstTick,} 0, False);
 
 //		FReSID.peakoutput:= 0;
 //		FReSID.clipped:= False;
@@ -1002,8 +1016,7 @@ procedure TXSIDThread.SetEnabled(const AVoice: reg8; const AEnable: Boolean);
 	begin
 //	Lock;
 //	try
-//FIXME
-//		FReSID.SetEnableVoice(AVoice, AEnable);
+		ReSIDMute(FReSID, AVoice, AEnable);
 
 //		finally
 //		Unlock;
