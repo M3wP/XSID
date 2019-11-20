@@ -372,10 +372,10 @@ procedure TSIDConvertMainForm.Button3Click(Sender: TObject);
 		else if  fmt = scfDetermine then
 			req:= 2
 		else
-			req:= 0;
+			req:= 1;
 
 		max:= CPUCount - 2;
-		if  max < 0 then
+		if  max < 1 then
 			max:= req;
 
 		node:= VirtualStringTree1.GetFirst;
